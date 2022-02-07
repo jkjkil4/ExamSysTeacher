@@ -25,14 +25,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        Ques/ques.cpp \
+        Ques/quessinglechoice.cpp \
+        SubWidget/editview.cpp \
         SubWidget/mainview.cpp \
         Util/config.cpp \
         main.cpp \
         mainwindow.cpp
 
 HEADERS += \
+        Ques/ques.h \
+        Ques/quessinglechoice.h \
+        SubWidget/editview.h \
         SubWidget/mainview.h \
         Util/config.h \
+        Util/dropsignallistwidget.h \
         Util/header.h \
         mainwindow.h
 
@@ -42,5 +49,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 FORMS += \
+    Ques/quessinglechoiceeditdialog.ui \
+    SubWidget/editview.ui \
     SubWidget/mainview.ui \
     mainwindow.ui

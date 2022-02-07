@@ -15,6 +15,7 @@ class MainView : public QWidget
     Q_OBJECT
 public:
     explicit MainView(QWidget *parent = nullptr);
+    ~MainView() override;
 
 signals:
     void newProjClicked();

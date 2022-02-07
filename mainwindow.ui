@@ -45,7 +45,13 @@
    <addaction name="menu"/>
    <addaction name="menu_2"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">QStatusBar{
+	background-color: rgb(24, 204, 192);
+}</string>
+   </property>
+  </widget>
   <action name="actNewProj">
    <property name="text">
     <string>新建试卷(&amp;N)</string>

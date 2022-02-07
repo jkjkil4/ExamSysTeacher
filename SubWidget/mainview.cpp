@@ -9,3 +9,8 @@ MainView::MainView(QWidget *parent)
     connect(ui->btnNew, SIGNAL(clicked()), this, SIGNAL(newProjClicked()));
     connect(ui->btnLoad, SIGNAL(clicked()), this, SIGNAL(loadProjClicked()));
 }
+
+MainView::~MainView()
+{
+    delete ui;
+}

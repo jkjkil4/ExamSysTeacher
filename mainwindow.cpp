@@ -14,16 +14,18 @@
 
 // 自写
 #include "SubWidget/mainview.h"
+#include "SubWidget/editview.h"
 #include "Util/config.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),
-      mStkLayout(new QStackedLayout), mMainView(new MainView(this))
+      mStkLayout(new QStackedLayout), mMainView(new MainView(this)), mEditView(new EditView(this))
 {
     ui->setupUi(this);
 
     mStkLayout->setMargin(0);
     mStkLayout->addWidget(mMainView);
+    mStkLayout->addWidget(mEditView);
     mStkLayout->setCurrentWidget(mMainView);
 
     ui->centralwidget->setLayout(mStkLayout);
@@ -42,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
+    delete ui;
 }
 
 void MainWindow::newProj(const QString &filePath) {
@@ -59,7 +61,6 @@ void MainWindow::newProj(const QString &filePath) {
     xml.writeEndDocument();
 
     file.close();
-
 }
 void MainWindow::loadProj(const QString &filePath) {
     Q_UNUSED(filePath)
@@ -75,6 +76,7 @@ void MainWindow::onNewProj() {
         return;
     config.setValue("EST/SaveExamPath", QFileInfo(filePath).path());
     newProj(filePath);
+    mStkLayout->setCurrentWidget(mEditView);
 }
 void MainWindow::onLoadProj() {
     Config config;

@@ -4,6 +4,7 @@
 
 class QStackedLayout;
 class MainView;
+class EditView;
 
 namespace Ui {
     class MainWindow;
@@ -18,7 +19,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     /**
      * @brief   新建试卷
@@ -48,4 +49,5 @@ private:
     QString mProjPath;
 
     MainView *mMainView;
+    EditView *mEditView;
 };
