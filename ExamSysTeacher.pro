@@ -50,6 +50,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     Ques/quessinglechoiceeditdialog.ui \
+    SubWidget/addquesdialog.ui \
     SubWidget/editview.ui \
     SubWidget/mainview.ui \
     mainwindow.ui

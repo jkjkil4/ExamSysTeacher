@@ -4,6 +4,7 @@
 #include <QMenu>
 
 #include "Ques/quessinglechoice.h"
+#include "ui_addquesdialog.h"
 
 EditView::EditView(QWidget *parent) :
     QWidget(parent),
@@ -22,7 +23,7 @@ EditView::EditView(QWidget *parent) :
     connect(ui->listWidget, &DropSignalListWidget::drop, this, &EditView::updateIndex);
     connect(ui->listWidget, &DropSignalListWidget::itemDoubleClicked, this, &EditView::onItemDoubleClicked);
 
-    createQues(&QuesSingleChoice::staticMetaObject);
+    connect(ui->btnAdd, &QPushButton::clicked, this, &EditView::onAddClicked);
 }
 
 EditView::~EditView()
@@ -103,5 +104,13 @@ void EditView::updateIndex() {
 }
 
 void EditView::onAddClicked() {
-
+    QDialog dialog(this);
+    Ui::AddQuesDialog ui;
+    ui.setupUi(&dialog);
+    for(auto iter = availableQues.cbegin(); iter != availableQues.cend(); ++iter) {
+        ui.cbbTypes->addItem(iter.value().name, iter.key());
+    }
+    if(dialog.exec()) {
+        createQues(availableQues.value(ui.cbbTypes->currentData().toString()).pMetaObject);
+    }
 }
