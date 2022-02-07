@@ -86,3 +86,14 @@ void MainWindow::onLoadProj() {
     config.setValue("EST/LoadExamPath", QFileInfo(filePath).path());
     loadProj(filePath);
 }
+
+void MainWindow::onAbout() {
+    QMessageBox::about(
+                this, "关于",
+                "ExamSysTeacher v0.1<br>"
+                "作者: jkjkil4<br>"
+                "gitee: <a href=https://gitee.com/jkjkil4/ExamSysTeacher>https://gitee.com/jkjkil4/ExamSysTeacher</a>");
+}
+void MainWindow::onAboutQt() {
+    QMessageBox::aboutQt(this);
+}
