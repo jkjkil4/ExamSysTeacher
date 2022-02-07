@@ -62,7 +62,7 @@
   </action>
   <action name="actLoadProj">
    <property name="text">
-    <string>读取试卷(&amp;O)</string>
+    <string>加载试卷(&amp;O)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
