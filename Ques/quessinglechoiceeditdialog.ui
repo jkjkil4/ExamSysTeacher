@@ -19,9 +19,9 @@
 }
 
 QLabel{
-	border: 2px solid rgb(24, 204, 192);
+	border: 2px solid rgb(26, 222, 209);
 	color: #FFFFFF;
-	background-color: rgb(24, 204, 192);
+	background-color: rgb(26, 222, 209);
 }
 
 QPushButton{

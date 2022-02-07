@@ -48,7 +48,7 @@
   <widget class="QStatusBar" name="statusbar">
    <property name="styleSheet">
     <string notr="true">QStatusBar{
-	background-color: rgb(24, 204, 192);
+	background-color: rgb(26, 222, 209);
 }</string>
    </property>
   </widget>

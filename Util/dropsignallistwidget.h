@@ -2,6 +2,9 @@
 
 #include <QListWidget>
 
+/**
+ * @brief 在拖放后发出信号的QListWidget
+ */
 class DropSignalListWidget : public QListWidget
 {
     Q_OBJECT

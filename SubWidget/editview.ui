@@ -14,7 +14,18 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QPushButton{
+	font: 25 10pt '微软雅黑';
+	color: #FFFFFF;
+	border: 2px solid rgb(24, 204, 192);
+	background-color: rgb(20,196,188);
+}
+QPushButton:hover{
+	background-color: rgb(22,218,208);
+}
+QPushButton:pressed{
+	background-color: rgb(17,171,164);
+}</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
@@ -93,9 +104,9 @@ QSplitter#splitter::margin{
            </property>
            <property name="styleSheet">
             <string notr="true">QLabel{
-	border: 2px solid rgb(24, 204, 192);
+	border: 2px solid rgb(26, 222, 209);
 	color: #FFFFFF;
-	background-color: rgb(24, 204, 192);
+	background-color: rgb(26, 222, 209);
 }</string>
            </property>
            <property name="text">
@@ -170,9 +181,9 @@ QSplitter#splitter::margin{
             </property>
             <property name="styleSheet">
              <string notr="true">QLabel{
-	border: 2px solid rgb(24, 204, 192);
+	border: 2px solid rgb(26, 222, 209);
 	color: #FFFFFF;
-	background-color: rgb(24, 204, 192);
+	background-color: rgb(26, 222, 209);
 }</string>
             </property>
             <property name="text">
@@ -209,7 +220,10 @@ QSplitter#splitter::margin{
          background-color: #FFFFFF;
  }</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
+       <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -231,9 +245,9 @@ QSplitter#splitter::margin{
           </property>
           <property name="styleSheet">
            <string notr="true">QLabel{
-	border: 2px solid rgb(24, 204, 192);
+	border: 2px solid rgb(26, 222, 209);
 	color: #FFFFFF;
-	background-color: rgb(24, 204, 192);
+	background-color: rgb(26, 222, 209);
 }</string>
           </property>
           <property name="text">
@@ -242,17 +256,32 @@ QSplitter#splitter::margin{
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
+         <widget class="QWidget" name="widgetAct" native="true">
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <property name="spacing">
+            <number>12</number>
+           </property>
+           <property name="leftMargin">
+            <number>20</number>
+           </property>
+           <property name="topMargin">
+            <number>20</number>
+           </property>
+           <property name="rightMargin">
+            <number>20</number>
+           </property>
+           <property name="bottomMargin">
+            <number>20</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="btnAdd">
+             <property name="text">
+              <string>添加题目</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>

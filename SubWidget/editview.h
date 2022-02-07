@@ -9,6 +9,9 @@ namespace Ui {
 class EditView;
 }
 
+/**
+ * @brief 编辑界面
+ */
 class EditView : public QWidget
 {
     Q_OBJECT
@@ -25,13 +28,21 @@ public:
 public slots:
     /**
      * @brief   响应双击item事件
-     * @param   双击的item
+     * @param   item    双击的item
      */
     void onItemDoubleClicked(QListWidgetItem *item);
+    /**
+     * @brief   响应右键菜单事件
+     * @param   pos     位置
+     */
+    void onCustomContextMenuRequested(const QPoint &pos);
     /**
      * @brief   用于更新题目的序号
      */
     void updateIndex();
+
+    /** @brief  响应添加题目事件 */
+    void onAddClicked();
 
 private:
     Ui::EditView *ui;
