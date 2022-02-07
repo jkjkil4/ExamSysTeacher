@@ -39,7 +39,7 @@ void EditView::createQues(const QMetaObject *pMetaObject) {
 
     QListWidgetItem *item = new QListWidgetItem;
     //item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-    item->setSizeHint(ques->sizeHint());
+    item->setSizeHint(ques->size());
 
     ui->listWidget->addItem(item);
     ui->listWidget->setItemWidget(item, ques);
@@ -48,11 +48,14 @@ void EditView::createQues(const QMetaObject *pMetaObject) {
 
 void EditView::onItemDoubleClicked(QListWidgetItem *item) {
     Ques *ques = (Ques*)ui->listWidget->itemWidget(item);
-    if(ques->edit()) {
-        int width = ques->width();
-        ques->adjustSize();
-        ques->resize(width, ques->height());
-        item->setSizeHint(ques->sizeHint());
+    Ques *other = ques->edit();
+    if(other) {
+        ui->listWidget->removeItemWidget(item);
+        ques->deleteLater();
+
+        other->setNumber(ui->listWidget->row(item) + 1);
+        ui->listWidget->setItemWidget(item, other);
+        item->setSizeHint(other->sizeHint());
     }
 }
 
