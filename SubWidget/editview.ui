@@ -105,10 +105,18 @@ QSplitter#splitter::margin{
          </item>
          <item>
           <widget class="DropSignalListWidget" name="listWidget">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="styleSheet">
             <string notr="true">QListWidget#listWidget{
 	border: none;
 }</string>
+           </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
           </widget>
          </item>

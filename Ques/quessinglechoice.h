@@ -11,11 +11,12 @@ class QuesSingleChoice : public Ques
 public:
     Q_INVOKABLE explicit QuesSingleChoice(QWidget *parent = nullptr);
 
-    void edit() override;
+    bool edit() override;
     void writeXml(QXmlStreamWriter &xml) override;
     void readXml(const QDomElement &elem) override;
 
 private:
-    QLabel *mLabelQues;
+    QLabel *mLabelQues, *mLabelList;
     QString text;
+    QStringList list;
 };

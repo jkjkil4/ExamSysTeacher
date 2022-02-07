@@ -3,9 +3,6 @@
 
 #include "Ques/quessinglechoice.h"
 
-#include <QDebug>
-#include <QMetaClassInfo>
-
 EditView::EditView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::EditView),
@@ -42,7 +39,7 @@ void EditView::createQues(const QMetaObject *pMetaObject) {
 
     QListWidgetItem *item = new QListWidgetItem;
     //item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-    item->setSizeHint(ques->size());
+    item->setSizeHint(ques->sizeHint());
 
     ui->listWidget->addItem(item);
     ui->listWidget->setItemWidget(item, ques);
@@ -51,7 +48,12 @@ void EditView::createQues(const QMetaObject *pMetaObject) {
 
 void EditView::onItemDoubleClicked(QListWidgetItem *item) {
     Ques *ques = (Ques*)ui->listWidget->itemWidget(item);
-    ques->edit();
+    if(ques->edit()) {
+        int width = ques->width();
+        ques->adjustSize();
+        ques->resize(width, ques->height());
+        item->setSizeHint(ques->sizeHint());
+    }
 }
 
 void EditView::updateIndex() {

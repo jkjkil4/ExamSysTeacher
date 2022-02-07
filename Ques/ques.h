@@ -28,7 +28,7 @@ public:
     /**
      * @brief   响应编辑操作
      */
-    virtual void edit();
+    virtual bool edit();
 
     /**
      * @brief   使用XML方式对题目内容进行保存

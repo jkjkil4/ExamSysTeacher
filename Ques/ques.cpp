@@ -19,6 +19,7 @@ Ques::Ques(QWidget *parent)
     mFrame->setStyleSheet("QFrame#QuesBox{border: 1px solid #DDDDDD;}");
     mLayoutMain->addWidget(mLabelNum, 0, Qt::AlignTop);
     mLayoutMain->addWidget(mFrame, 1);
+    mLayoutMain->setSizeConstraint(QHBoxLayout::SizeConstraint::SetMaximumSize);
     setLayout(mLayoutMain);
 }
 
@@ -26,6 +27,6 @@ void Ques::setNumber(int num) {
     mLabelNum->setText(QString::number(num) + '.');
 }
 
-void Ques::edit() {}
+bool Ques::edit() { return false; }
 void Ques::writeXml(QXmlStreamWriter &) {}
 void Ques::readXml(const QDomElement &) {}
