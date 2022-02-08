@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QuesSingleChoiceEditDialog</class>
- <widget class="QDialog" name="QuesSingleChoiceEditDialog">
+ <class>QuesChoiceEditDialog</class>
+ <widget class="QDialog" name="QuesChoiceEditDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -257,7 +257,7 @@ QPushButton:pressed{
   <connection>
    <sender>btnOK</sender>
    <signal>clicked()</signal>
-   <receiver>QuesSingleChoiceEditDialog</receiver>
+   <receiver>QuesChoiceEditDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -273,7 +273,7 @@ QPushButton:pressed{
   <connection>
    <sender>btnCancel</sender>
    <signal>clicked()</signal>
-   <receiver>QuesSingleChoiceEditDialog</receiver>
+   <receiver>QuesChoiceEditDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

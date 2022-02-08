@@ -3,6 +3,9 @@
 
 #include <QMenu>
 
+#include <QXmlStreamWriter>
+#include <QDomElement>
+
 #include "Ques/quessinglechoice.h"
 #include "ui_addquesdialog.h"
 
@@ -17,9 +20,6 @@ EditView::EditView(QWidget *parent) :
 
     ui->splitter->setSizes(QList<int>() << 400 << 100);
     ui->splitterRight->setSizes(QList<int>() << 300 << 100);
-
-//    connect(ui->listWidget, &DropSignalListWidget::drop, this, &EditView::updateIndex);
-//    connect(ui->listWidget, &DropSignalListWidget::itemDoubleClicked, this, &EditView::onItemDoubleClicked);
 
     connect(ui->btnAdd, &QPushButton::clicked, this, &EditView::onAddClicked);
 
@@ -36,21 +36,55 @@ EditView::~EditView()
     delete ui;
 }
 
-void EditView::createQues(const QMetaObject *pMetaObject) {
+Ques *EditView::createQues(const QMetaObject *pMetaObject) {
     Ques *ques = (Ques*)pMetaObject->newInstance();
     if(!ques)
-        return;
+        return nullptr;
 
     ques->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     connect(ques, &Ques::customContextMenuRequested, this, &EditView::onCustomContextMenuRequested);
 
     mLayoutScrollItems->addWidget(ques);
     updateIndex(mLayoutScrollItems->count() - 1);
+
+    return ques;
 }
 
 void EditView::updateIndex(int ind, int val) {
     Ques *ques = (Ques*)mLayoutScrollItems->itemAt(ind)->widget();
     ques->setNumber((val == -1 ? ind : val) + 1);
+}
+
+void EditView::writeQuesXml(QXmlStreamWriter &xml) {
+    xml.writeStartElement("QuesList");
+    int count = mLayoutScrollItems->count();
+    for(int i = 0; i < count; ++i) {
+        Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
+        ques->writeXml(xml);
+    }
+    xml.writeEndElement();
+}
+void EditView::readQuesXml(const QDomElement &elem) {
+    clearQues();
+    QDomNode node = elem.firstChild();
+    while(!node.isNull()) {
+        QDomElement elem = node.toElement();
+        auto iter = availableQues.constFind(elem.tagName());
+        if(iter != availableQues.cend()) {
+            Ques *ques = createQues(iter.value().pMetaObject);
+            if(ques) {
+                ques->readXml(elem);
+            }
+        }
+        node = node.nextSibling();
+    }
+}
+
+void EditView::clearQues() {
+    int count = mLayoutScrollItems->count();
+    for(int i = 0; i < count; ++i) {
+        mLayoutScrollItems->takeAt(0)->widget()->deleteLater();
+    }
 }
 
 void EditView::onCustomContextMenuRequested(const QPoint &) {

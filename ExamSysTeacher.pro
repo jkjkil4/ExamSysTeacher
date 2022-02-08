@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
         Ques/ques.cpp \
+        Ques/queschoice.cpp \
         Ques/quessinglechoice.cpp \
         SubWidget/editview.cpp \
         SubWidget/mainview.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
 
 HEADERS += \
         Ques/ques.h \
+        Ques/queschoice.h \
         Ques/quessinglechoice.h \
         SubWidget/editview.h \
         SubWidget/mainview.h \
@@ -49,7 +51,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 FORMS += \
-    Ques/quessinglechoiceeditdialog.ui \
+    Ques/queschoiceeditdialog.ui \
     SubWidget/addquesdialog.ui \
     SubWidget/editview.ui \
     SubWidget/mainview.ui \
