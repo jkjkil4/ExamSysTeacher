@@ -67,9 +67,10 @@ private:
     QVBoxLayout *mLayoutScrollItems;
 
     struct QuesType {
+        QString key;
         QString name;
         const QMetaObject *pMetaObject;
     };
-
-    QMap<QString, QuesType> availableQues;
+    const QuesType* findQues(const QString &key);
+    QList<QuesType> availableQues;
 };

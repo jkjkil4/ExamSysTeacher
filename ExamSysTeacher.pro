@@ -27,6 +27,7 @@ CONFIG += c++11
 SOURCES += \
         Ques/ques.cpp \
         Ques/queschoice.cpp \
+        Ques/quesmultichoice.cpp \
         Ques/quessinglechoice.cpp \
         SubWidget/editview.cpp \
         SubWidget/mainview.cpp \
@@ -37,6 +38,7 @@ SOURCES += \
 HEADERS += \
         Ques/ques.h \
         Ques/queschoice.h \
+        Ques/quesmultichoice.h \
         Ques/quessinglechoice.h \
         SubWidget/editview.h \
         SubWidget/mainview.h \

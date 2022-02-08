@@ -91,7 +91,7 @@ bool QuesChoice::edit() {
 }
 
 void QuesChoice::writeXml(QXmlStreamWriter &xml) const {
-    xml.writeStartElement("QuesSingleChoice");
+    xml.writeStartElement(metaObject()->className());
     xml.writeAttribute("Ques", mText);
 
     int i = 0;

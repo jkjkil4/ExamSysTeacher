@@ -2,11 +2,11 @@
 
 #include "queschoice.h"
 
-class QuesSingleChoice : public QuesChoice
+class QuesMultiChoice : public QuesChoice
 {
     Q_OBJECT
 public:
-    Q_INVOKABLE explicit QuesSingleChoice(QWidget *parent = nullptr);
+    Q_INVOKABLE explicit QuesMultiChoice(QWidget *parent = nullptr);
 
     QAbstractButton* createBtn(const QString &str) override;
 };

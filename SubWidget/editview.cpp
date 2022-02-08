@@ -7,13 +7,15 @@
 #include <QDomElement>
 
 #include "Ques/quessinglechoice.h"
+#include "Ques/quesmultichoice.h"
 #include "ui_addquesdialog.h"
 
 EditView::EditView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::EditView), mLayoutScrollItems(new QVBoxLayout),
     availableQues({
-                  {"QuesSingleChoice", {"单选题", &QuesSingleChoice::staticMetaObject}}
+                  {"QuesSingleChoice", "单选题", &QuesSingleChoice::staticMetaObject},
+                  {"QuesMultiChoice", "多选题", &QuesMultiChoice::staticMetaObject}
                   })
 {
     ui->setupUi(this);
@@ -69,9 +71,9 @@ void EditView::readQuesXml(const QDomElement &elem) {
     QDomNode node = elem.firstChild();
     while(!node.isNull()) {
         QDomElement elem = node.toElement();
-        auto iter = availableQues.constFind(elem.tagName());
-        if(iter != availableQues.cend()) {
-            Ques *ques = createQues(iter.value().pMetaObject);
+        const QuesType *p = findQues(elem.tagName());
+        if(p) {
+            Ques *ques = createQues(p->pMetaObject);
             if(ques) {
                 ques->readXml(elem);
             }
@@ -137,10 +139,20 @@ void EditView::onAddClicked() {
     QDialog dialog(this);
     Ui::AddQuesDialog ui;
     ui.setupUi(&dialog);
-    for(auto iter = availableQues.cbegin(); iter != availableQues.cend(); ++iter) {
-        ui.cbbTypes->addItem(iter.value().name, iter.key());
+
+    for(const QuesType &qtype : availableQues) {
+        ui.cbbTypes->addItem(qtype.name);
     }
+
     if(dialog.exec()) {
-        createQues(availableQues.value(ui.cbbTypes->currentData().toString()).pMetaObject);
+        createQues(availableQues[ui.cbbTypes->currentIndex()].pMetaObject);
     }
+}
+
+const EditView::QuesType *EditView::findQues(const QString &key) {
+    for(const QuesType &qtype : availableQues) {
+        if(qtype.key == key)
+            return &qtype;
+    }
+    return nullptr;
 }
