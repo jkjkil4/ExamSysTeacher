@@ -15,7 +15,6 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QPushButton{
-	font: 25 14pt '微软雅黑';
 	color: #FFFFFF;
 	background-color: rgb(20,196,188);
 	border: 4px solid rgb(24, 204, 192);
@@ -53,7 +52,6 @@ QPushButton:pressed{
         <widget class="QLabel" name="labelTitle">
          <property name="font">
           <font>
-           <family>微软雅黑</family>
            <pointsize>36</pointsize>
           </font>
          </property>
@@ -72,7 +70,6 @@ QPushButton:pressed{
         <widget class="QLabel" name="labelSubTitle">
          <property name="font">
           <font>
-           <family>微软雅黑</family>
            <pointsize>12</pointsize>
           </font>
          </property>
@@ -119,6 +116,11 @@ QPushButton:pressed{
        </item>
        <item>
         <widget class="QPushButton" name="btnNew">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>新建试卷</string>
          </property>
@@ -156,6 +158,11 @@ QPushButton:pressed{
        </item>
        <item>
         <widget class="QPushButton" name="btnLoad">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>加载试卷</string>
          </property>

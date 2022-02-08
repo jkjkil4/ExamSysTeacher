@@ -15,7 +15,6 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QPushButton{
-	font: 25 10pt '微软雅黑';
 	color: #FFFFFF;
 	border: 2px solid rgb(24, 204, 192);
 	background-color: rgb(20,196,188);
@@ -132,7 +131,7 @@ QSplitter#splitter::margin{
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>778</width>
+              <width>479</width>
               <height>640</height>
              </rect>
             </property>

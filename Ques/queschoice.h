@@ -39,5 +39,4 @@ private:
     QString mHead;
     QString mText;
     QStringList mList;
-    int mTrueAns = -1;
 };

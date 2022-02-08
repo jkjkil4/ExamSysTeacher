@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>110</height>
+    <height>100</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>380</width>
-    <height>110</height>
+    <height>100</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>380</width>
-    <height>110</height>
+    <height>100</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,6 @@
       <widget class="QPushButton" name="btnOK">
        <property name="styleSheet">
         <string notr="true">QPushButton{
-	font: 25 10pt '微软雅黑';
 	color: #FFFFFF;
 	border: 2px solid rgb(24, 204, 192);
 	background-color: rgb(20,196,188);

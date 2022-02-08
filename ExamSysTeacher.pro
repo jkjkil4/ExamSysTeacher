@@ -57,7 +57,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     Ques/queschoiceeditdialog.ui \
+    Ques/queswhetherdialog.ui \
     SubWidget/addquesdialog.ui \
     SubWidget/editview.ui \
     SubWidget/mainview.ui \
     mainwindow.ui
+
+RESOURCES += \
+    src.qrc

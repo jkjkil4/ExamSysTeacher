@@ -1,16 +1,23 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-#include "Widget/doubleslidebutton.h"
+#include <QFontDatabase>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    int fontId = QFontDatabase::addApplicationFont(":/font/src/NotoSansSChineseMedium-7.ttf");
+    QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
+
+    QFont font = a.font();
+    font.setPointSize(10);
+    if(!family.isEmpty())
+        font.setFamily(family);
+    a.setFont(font);
+
     MainWindow w;
     w.showMaximized();
-
-    DoubleSlideButton btn;
-    btn.show();
 
     return a.exec();
 }

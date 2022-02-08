@@ -8,6 +8,7 @@
 
 #include "Ques/quessinglechoice.h"
 #include "Ques/quesmultichoice.h"
+#include "Ques/queswhether.h"
 #include "ui_addquesdialog.h"
 
 EditView::EditView(QWidget *parent) :
@@ -15,7 +16,8 @@ EditView::EditView(QWidget *parent) :
     ui(new Ui::EditView), mLayoutScrollItems(new QVBoxLayout),
     availableQues({
                   {"QuesSingleChoice", "单选题", &QuesSingleChoice::staticMetaObject},
-                  {"QuesMultiChoice", "多选题", &QuesMultiChoice::staticMetaObject}
+                  {"QuesMultiChoice", "多选题", &QuesMultiChoice::staticMetaObject},
+                  {"QuesWhether", "判断题", &QuesWhether::staticMetaObject}
                   })
 {
     ui->setupUi(this);
@@ -38,7 +40,7 @@ EditView::~EditView()
     delete ui;
 }
 
-Ques *EditView::createQues(const QMetaObject *pMetaObject) {
+Ques* EditView::createQues(const QMetaObject *pMetaObject) {
     Ques *ques = (Ques*)pMetaObject->newInstance();
     if(!ques)
         return nullptr;

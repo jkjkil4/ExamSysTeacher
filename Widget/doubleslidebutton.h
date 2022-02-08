@@ -53,8 +53,8 @@ signals:
     void stateChanged();
 
 private:
-    int mCircleRadius = 20;
-    int mRectLength = 54;
+    int mCircleRadius = 12;
+    int mRectLength = 32;
     int mBorderSize = 3;
 
     QColor mColorBorder = QColor(24, 204, 192);

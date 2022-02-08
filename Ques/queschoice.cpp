@@ -14,9 +14,6 @@ QuesChoice::QuesChoice(const QString &head, QWidget *parent)
       mLabelQues(new QLabel(head)), mLayout(new QVBoxLayout), mLayoutButtons(new QVBoxLayout),
       mHead(head)
 {
-    QFont font = mLabelQues->font();
-    font.setPointSize(10);
-    mLabelQues->setFont(font);
     mLabelQues->setWordWrap(true);
 
     mLayout->addWidget(mLabelQues);
@@ -26,9 +23,10 @@ QuesChoice::QuesChoice(const QString &head, QWidget *parent)
 }
 
 bool QuesChoice::edit() {
-    QDialog dialog;
+    QDialog dialog(this);
     Ui::QuesChoiceEditDialog ui;
     ui.setupUi(&dialog);
+    dialog.setWindowTitle("编辑题目" + mHead);
     ui.editQues->setPlainText(mText);
     for(const QString &str : mList) {
         QListWidgetItem *item = new QListWidgetItem(str);
