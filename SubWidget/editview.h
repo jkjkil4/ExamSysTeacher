@@ -48,11 +48,22 @@ public:
     void readQuesXml(const QDomElement &elem);
 
     /**
+     * @brief   更新信息
+     */
+    void updateInfo();
+
+    /**
      * @brief   清空题目
      */
     void clearQues();
+    /**
+     * @brief   清空所有
+     */
+    void clear();
 
 public slots:
+    /** @brief  响应双击编辑事件 */
+    void onDoubleClicked();
     /**
      * @brief   响应右键菜单事件
      * @param   pos     位置
@@ -62,9 +73,17 @@ public slots:
     /** @brief  响应添加题目事件 */
     void onAddClicked();
 
+signals:
+    void changed();
+
+public:
+    void setProjName(const QString &projName);
+
 private:
     Ui::EditView *ui;
     QVBoxLayout *mLayoutScrollItems;
+
+    QString mProjName;
 
     struct QuesType {
         QString key;

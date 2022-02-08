@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(mMainView, &MainView::newProjClicked, this, &MainWindow::onNewProj);
     connect(mMainView, &MainView::loadProjClicked, this, &MainWindow::onLoadProj);
+
+    connect(mEditView, &EditView::changed, [this] { mIsChanged = true; });
 }
 
 MainWindow::~MainWindow()
@@ -66,7 +68,7 @@ bool MainWindow::newProj(const QString &filePath) {
 
     file.close();
 
-    mEditView->clearQues();
+    mEditView->clear();
 
     return true;
 }
@@ -101,15 +103,45 @@ bool MainWindow::loadProj(const QString &filePath) {
 
     return true;
 }
+bool MainWindow::saveProj(const QString &filePath) {
+    QFile file(filePath);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "错误", "保存失败");
+        return false;
+    }
+
+    QXmlStreamWriter xml(&file);
+    xml.setAutoFormatting(true);
+    xml.writeStartDocument();
+    xml.writeStartElement("ExamSysProject");
+    xml.writeAttribute("Version", QString::number(PROJ_VERSION));
+    mEditView->writeQuesXml(xml);
+    xml.writeEndElement();
+    xml.writeEndDocument();
+
+    file.close();
+
+    return true;
+}
+
+bool MainWindow::verifyClose() {
+    int ret = QMessageBox::information(this, "提示", "文件未保存", "保存", "不保存", "取消");
+    if(ret == 0)
+        return saveProj(mProjPath);
+    return ret == 1;
+}
 
 void MainWindow::onNewProj() {
     QWidget *currentWidget = mStkLayout->currentWidget();
     if(currentWidget != mMainView && currentWidget != mEditView)
         return;
 
+    if(mIsChanged && !verifyClose())
+        return;
+
     Config config;
     QString filePath = QFileDialog::getSaveFileName(
-                this, "保存路径", config.value("EST/SaveExamPath").toString() + "/untitled.estp",
+                this, "新试卷路径", config.value("EST/SaveExamPath").toString() + "/untitled.estp",
                 "试卷文件 (*.estp);;所有文件(*.*)");
     if(filePath.isEmpty())
         return;
@@ -118,11 +150,15 @@ void MainWindow::onNewProj() {
     if(!newProj(filePath))
         return;
     mProjPath = filePath;
+    mEditView->setProjName(QFileInfo(mProjPath).completeBaseName());
     mStkLayout->setCurrentWidget(mEditView);
 }
 void MainWindow::onLoadProj() {
     QWidget *currentWidget = mStkLayout->currentWidget();
     if(currentWidget != mMainView && currentWidget != mEditView)
+        return;
+
+    if(mIsChanged && !verifyClose())
         return;
 
     Config config;
@@ -136,6 +172,7 @@ void MainWindow::onLoadProj() {
     if(!loadProj(filePath))
         return;
     mProjPath = filePath;
+    mEditView->setProjName(QFileInfo(mProjPath).completeBaseName());
     mStkLayout->setCurrentWidget(mEditView);
 }
 void MainWindow::onSaveProj() {
@@ -143,22 +180,8 @@ void MainWindow::onSaveProj() {
     if(currentWidget != mEditView)
         return;
 
-    QFile file(mProjPath);
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "错误", "保存失败");
-        return;
-    }
-
-    QXmlStreamWriter xml(&file);
-    xml.setAutoFormatting(true);
-    xml.writeStartDocument();
-    xml.writeStartElement("ExamSysProject");
-    xml.writeAttribute("Version", QString::number(PROJ_VERSION));
-    mEditView->writeQuesXml(xml);
-    xml.writeEndElement();
-    xml.writeEndDocument();
-
-    file.close();
+    if(saveProj(mProjPath))
+        mIsChanged = false;
 }
 
 void MainWindow::onAbout() {

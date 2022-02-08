@@ -31,6 +31,14 @@ public:
      * @param   filePath    读取的文件路径
      */
     bool loadProj(const QString &filePath);
+    /**
+     * @brief   保存试卷
+     * @param   filePath    保存的文件路径
+     * @return
+     */
+    bool saveProj(const QString &filePath);
+
+    bool verifyClose();
 
 public slots:
     /** @brief  用于响应新建试卷的信号 */
@@ -49,6 +57,7 @@ private:
     QStackedLayout *mStkLayout;
 
     QString mProjPath;
+    bool mIsChanged = false;
 
     MainView *mMainView;
     EditView *mEditView;

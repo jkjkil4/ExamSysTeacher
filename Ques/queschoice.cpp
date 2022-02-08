@@ -78,7 +78,9 @@ bool QuesChoice::edit() {
         for(int i = 0; i < count; ++i) {
             QString str = ui.listWidget->item(i)->text();
             mList << str;
-            mLayoutButtons->addWidget(createBtn(numToLetter(i) + ". " + str));
+            QAbstractButton *btn = createBtn(numToLetter(i) + ". " + str);
+            connect(btn, &QAbstractButton::toggled, this, [this](bool) { emit changed(); });
+            mLayoutButtons->addWidget(btn);
         }
 
         mText = ui.editQues->toPlainText();
@@ -124,6 +126,7 @@ void QuesChoice::readXml(const QDomElement &elem) {
             mList << str;
             QAbstractButton *btn = createBtn(numToLetter(i) + ". " + str);
             btn->setChecked(checked);
+            connect(btn, &QAbstractButton::toggled, this, [this](bool) { emit changed(); });
             mLayoutButtons->addWidget(btn);
             i++;
         }

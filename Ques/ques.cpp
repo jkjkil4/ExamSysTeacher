@@ -34,5 +34,5 @@ void Ques::readXml(const QDomElement &) {}
 
 void Ques::mouseDoubleClickEvent(QMouseEvent *ev) {
     if(ev->button() == Qt::LeftButton)
-        edit();
+        emit doubleClicked();
 }

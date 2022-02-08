@@ -25,6 +25,8 @@ QuesWhether::QuesWhether(QWidget *parent)
     mLayout->addSpacing(16);
     mLayout->addLayout(mLayoutButton);
     mFrame->setLayout(mLayout);
+
+    connect(mButton, SIGNAL(stateChanged()), this, SIGNAL(changed()));
 }
 
 bool QuesWhether::edit() {
@@ -55,7 +57,9 @@ void QuesWhether::writeXml(QXmlStreamWriter &xml) const {
 }
 
 void QuesWhether::readXml(const QDomElement &elem) {
+    mButton->blockSignals(true);
     mButton->setState((DoubleSlideButton::State)elem.attribute("State").toInt());
+    mButton->blockSignals(false);
     mText = elem.text();
     mLabelQues->setText("（判断题）" + mText);
 }

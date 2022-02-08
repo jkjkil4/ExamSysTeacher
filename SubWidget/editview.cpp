@@ -46,10 +46,14 @@ Ques* EditView::createQues(const QMetaObject *pMetaObject) {
         return nullptr;
 
     ques->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    connect(ques, SIGNAL(changed()), this, SIGNAL(changed()));
+    connect(ques, &Ques::doubleClicked, this, &EditView::onDoubleClicked);
     connect(ques, &Ques::customContextMenuRequested, this, &EditView::onCustomContextMenuRequested);
 
     mLayoutScrollItems->addWidget(ques);
     updateIndex(mLayoutScrollItems->count() - 1);
+
+    updateInfo();
 
     return ques;
 }
@@ -82,6 +86,15 @@ void EditView::readQuesXml(const QDomElement &elem) {
         }
         node = node.nextSibling();
     }
+
+    updateInfo();
+}
+
+void EditView::updateInfo() {
+    QString info;
+    info += "名称: " + mProjName + '\n';
+    info += "题目量: " + QString::number(mLayoutScrollItems->count()) + '\n';
+    ui->labelInfo->setText(info);
 }
 
 void EditView::clearQues() {
@@ -89,6 +102,16 @@ void EditView::clearQues() {
     for(int i = 0; i < count; ++i) {
         mLayoutScrollItems->takeAt(0)->widget()->deleteLater();
     }
+}
+void EditView::clear() {
+    clearQues();
+    updateInfo();
+}
+
+void EditView::onDoubleClicked() {
+    Ques *ques = qobject_cast<Ques*>(sender());
+    if(ques->edit())
+        emit changed();
 }
 
 void EditView::onCustomContextMenuRequested(const QPoint &) {
@@ -106,6 +129,8 @@ void EditView::onCustomContextMenuRequested(const QPoint &) {
         mLayoutScrollItems->insertItem(ind, mLayoutScrollItems->takeAt(ind - 1));
         updateIndex(ind - 1);
         updateIndex(ind);
+
+        emit changed();
     });
 
     QAction actMoveDown("下移");
@@ -118,6 +143,8 @@ void EditView::onCustomContextMenuRequested(const QPoint &) {
         mLayoutScrollItems->insertItem(ind, mLayoutScrollItems->takeAt(ind + 1));
         updateIndex(ind + 1);
         updateIndex(ind);
+
+        emit changed();
     });
 
     menu.addSeparator();
@@ -131,6 +158,10 @@ void EditView::onCustomContextMenuRequested(const QPoint &) {
             updateIndex(i, i - 1);
         }
         ques->deleteLater();
+
+        updateInfo();
+
+        emit changed();
     });
 
     menu.move(cursor().pos());
@@ -148,6 +179,14 @@ void EditView::onAddClicked() {
 
     if(dialog.exec()) {
         createQues(availableQues[ui.cbbTypes->currentIndex()].pMetaObject);
+        emit changed();
+    }
+}
+
+void EditView::setProjName(const QString &projName) {
+    if(projName != mProjName) {
+        mProjName = projName;
+        updateInfo();
     }
 }
 

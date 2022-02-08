@@ -19,7 +19,7 @@ void DoubleSlideButton::updateSizeLimit() {
 
 void DoubleSlideButton::onClicked() {
     QPoint pos = mapFromGlobal(cursor().pos());
-    mState = pos.x() < mCircleRadius + mRectLength / 2 ? Left : Right;
+    setState(pos.x() < mCircleRadius + mRectLength / 2 ? Left : Right);
     update();
 }
 

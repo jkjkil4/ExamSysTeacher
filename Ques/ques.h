@@ -44,6 +44,10 @@ public:
 protected:
     void mouseDoubleClickEvent(QMouseEvent *ev) override;
 
+signals:
+    void changed();
+    void doubleClicked();
+
 protected:
     QLabel *mLabelNum;
     QFrame *mFrame;
