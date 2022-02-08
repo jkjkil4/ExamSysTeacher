@@ -29,9 +29,11 @@ SOURCES += \
         Ques/queschoice.cpp \
         Ques/quesmultichoice.cpp \
         Ques/quessinglechoice.cpp \
+        Ques/queswhether.cpp \
         SubWidget/editview.cpp \
         SubWidget/mainview.cpp \
         Util/config.cpp \
+        Widget/doubleslidebutton.cpp \
         main.cpp \
         mainwindow.cpp
 
@@ -40,11 +42,12 @@ HEADERS += \
         Ques/queschoice.h \
         Ques/quesmultichoice.h \
         Ques/quessinglechoice.h \
+        Ques/queswhether.h \
         SubWidget/editview.h \
         SubWidget/mainview.h \
         Util/config.h \
-        Util/dropsignallistwidget.h \
         Util/header.h \
+        Widget/doubleslidebutton.h \
         mainwindow.h
 
 # Default rules for deployment.
