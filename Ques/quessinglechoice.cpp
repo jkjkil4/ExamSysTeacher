@@ -12,7 +12,7 @@
 
 QuesSingleChoice::QuesSingleChoice(QWidget *parent)
     : Ques(parent),
-      mLabelQues(new QLabel("（单选题）")), mLayout(new QVBoxLayout)
+      mLabelQues(new QLabel("（单选题）")), mLayout(new QVBoxLayout), mLayoutButtons(new QVBoxLayout)
 {
     QFont font = mLabelQues->font();
     font.setPointSize(10);
@@ -21,10 +21,11 @@ QuesSingleChoice::QuesSingleChoice(QWidget *parent)
 
     mLayout->addWidget(mLabelQues);
     mLayout->addSpacing(16);
+    mLayout->addLayout(mLayoutButtons);
     mFrame->setLayout(mLayout);
 }
 
-Ques* QuesSingleChoice::edit() const {
+bool QuesSingleChoice::edit() {
     QDialog dialog;
     Ui::QuesSingleChoiceEditDialog ui;
     ui.setupUi(&dialog);
@@ -69,13 +70,17 @@ Ques* QuesSingleChoice::edit() const {
     });
 
     if(dialog.exec()) {
-        QuesSingleChoice *other = new QuesSingleChoice;
+        list.clear();
+        int btnCnt = mLayoutButtons->count();
+        for(int i = 0; i < btnCnt; i++) {
+            mLayoutButtons->itemAt(i)->widget()->deleteLater();
+        }
 
         int count = ui.listWidget->count();
         for(int i = 0; i < count; ++i) {
             QString itemText = ui.listWidget->item(i)->text();
 
-            other->list << itemText;
+            list << itemText;
 
             QString str;
             int tmp = i;
@@ -85,18 +90,18 @@ Ques* QuesSingleChoice::edit() const {
             } while(tmp);
             str += ". " + itemText;
             QRadioButton *rb = new QRadioButton(str);
-            other->mLayout->addWidget(rb);
-            connect(rb, &QRadioButton::clicked, other, [other, i](bool checked) {
+            mLayoutButtons->addWidget(rb);
+            connect(rb, &QRadioButton::clicked, this, [this, i](bool checked) {
                 if(checked)
-                    other->trueAns = i;
+                    trueAns = i;
             });
         }
 
-        other->text = ui.editQues->toPlainText();
-        other->mLabelQues->setText("（单选题）" + other->text);
-        return other;
+        text = ui.editQues->toPlainText();
+        mLabelQues->setText("（单选题）" + text);
+        return true;
     }
-    return nullptr;
+    return false;
 }
 
 void QuesSingleChoice::writeXml(QXmlStreamWriter &xml) const {

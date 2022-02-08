@@ -14,14 +14,14 @@ class QuesSingleChoice : public Ques
 public:
     Q_INVOKABLE explicit QuesSingleChoice(QWidget *parent = nullptr);
 
-    Ques* edit() const override;
+    bool edit() override;
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
 
 private:
     QLabel *mLabelQues;
 //    QList<QRadioButton*> mRadioButtonList;
-    QVBoxLayout *mLayout;
+    QVBoxLayout *mLayout, *mLayoutButtons;
 
     QString text;
     QStringList list;

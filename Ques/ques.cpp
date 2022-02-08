@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QHBoxLayout>
+#include <QMouseEvent>
 
 Ques::Ques(QWidget *parent)
     : QWidget(parent),
@@ -27,6 +28,11 @@ void Ques::setNumber(int num) {
     mLabelNum->setText(QString::number(num) + '.');
 }
 
-Ques *Ques::edit() const { return nullptr; }
+bool Ques::edit() { return false; }
 void Ques::writeXml(QXmlStreamWriter &) const {}
 void Ques::readXml(const QDomElement &) {}
+
+void Ques::mouseDoubleClickEvent(QMouseEvent *ev) {
+    if(ev->button() == Qt::LeftButton)
+        edit();
+}

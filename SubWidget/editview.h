@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QMap>
 
-class QListWidgetItem;
+class QVBoxLayout;
 
 namespace Ui {
 class EditView;
@@ -25,27 +25,26 @@ public:
      */
     void createQues(const QMetaObject *pMetaObject);
 
-public slots:
     /**
-     * @brief   响应双击item事件
-     * @param   item    双击的item
+     * @brief   用于更新题目序号
+     * @param   ind     题目索引
+     * @param   val     -1表示默认序号，其他值则为给定序号
      */
-    void onItemDoubleClicked(QListWidgetItem *item);
+    void updateIndex(int ind, int val = -1);
+
+public slots:
     /**
      * @brief   响应右键菜单事件
      * @param   pos     位置
      */
     void onCustomContextMenuRequested(const QPoint &pos);
-    /**
-     * @brief   用于更新题目的序号
-     */
-    void updateIndex();
 
     /** @brief  响应添加题目事件 */
     void onAddClicked();
 
 private:
     Ui::EditView *ui;
+    QVBoxLayout *mLayoutScrollItems;
 
     struct QuesType {
         QString name;

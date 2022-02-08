@@ -34,6 +34,8 @@
     </property>
     <addaction name="actNewProj"/>
     <addaction name="actLoadProj"/>
+    <addaction name="separator"/>
+    <addaction name="actSaveProj"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -76,6 +78,14 @@
   <action name="actAboutQt">
    <property name="text">
     <string>关于Qt</string>
+   </property>
+  </action>
+  <action name="actSaveProj">
+   <property name="text">
+    <string>保存试卷(&amp;S)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

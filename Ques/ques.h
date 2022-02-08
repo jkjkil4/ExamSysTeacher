@@ -27,9 +27,8 @@ public:
 
     /**
      * @brief   响应编辑操作
-     * @return  编辑后的Ques（另一个对象）
      */
-    virtual Ques* edit() const;
+    virtual bool edit();
 
     /**
      * @brief   使用XML方式对题目内容进行保存
@@ -41,6 +40,9 @@ public:
      * @param   elem    QDomElement对象，用于读取XML
      */
     virtual void readXml(const QDomElement &elem);
+
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *ev) override;
 
 protected:
     QLabel *mLabelNum;
