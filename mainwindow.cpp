@@ -17,24 +17,27 @@
 // 自写
 #include "SubWidget/mainview.h"
 #include "SubWidget/editview.h"
+#include "SubWidget/pushview.h"
 #include "Util/config.h"
 #include "Util/header.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),
-      mStkLayout(new QStackedLayout), mMainView(new MainView(this)), mEditView(new EditView(this))
+      mStkLayout(new QStackedLayout),
+      mMainView(new MainView(this)), mEditView(new EditView(this)), mPushView(new PushView(this))
 {
     ui->setupUi(this);
 
     mStkLayout->setMargin(0);
     mStkLayout->addWidget(mMainView);
     mStkLayout->addWidget(mEditView);
+    mStkLayout->addWidget(mPushView);
     mStkLayout->setCurrentWidget(mMainView);
 
     ui->centralwidget->setLayout(mStkLayout);
 
     setWindowTitle("考试系统（教师端）");
-    resize(1100, 760);
+    resize(1240, 760);
 
     connect(ui->actNewProj, &QAction::triggered, this, &MainWindow::onNewProj);
     connect(ui->actLoadProj, &QAction::triggered, this, &MainWindow::onLoadProj);
@@ -46,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mMainView, &MainView::loadProjClicked, this, &MainWindow::onLoadProj);
 
     connect(mEditView, &EditView::changed, [this] { mIsChanged = true; });
+    connect(mEditView, &EditView::push, this, &MainWindow::onPush);
 }
 
 MainWindow::~MainWindow()
@@ -185,6 +189,14 @@ void MainWindow::onSaveProj() {
         mIsChanged = false;
 }
 
+void MainWindow::onPush() {
+    if(!saveProj(mProjPath))
+        return;
+    mIsChanged = false;
+
+    mStkLayout->setCurrentWidget(mPushView);
+}
+
 void MainWindow::onAbout() {
     QMessageBox::about(
                 this, "关于",
@@ -197,6 +209,6 @@ void MainWindow::onAboutQt() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *ev) {
-    if(!verifyClose())
+    if(mIsChanged && !verifyClose())
         ev->ignore();
 }

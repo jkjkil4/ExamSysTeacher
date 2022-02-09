@@ -70,9 +70,9 @@ QSplitter#splitter::margin{
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QWidget" name="widgetLeft" native="true">
+     <widget class="QWidget" name="widgetQues" native="true">
       <property name="styleSheet">
-       <string notr="true">QWidget#widgetLeft{
+       <string notr="true">QWidget#widgetQues{
 	background-color: #FFFFFF;
 }</string>
       </property>
@@ -95,7 +95,7 @@ QSplitter#splitter::margin{
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="labelQues">
            <property name="font">
             <font>
              <pointsize>10</pointsize>
@@ -163,9 +163,9 @@ QSplitter#splitter::margin{
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QWidget" name="widgetRight" native="true">
+      <widget class="QWidget" name="widgetInfo" native="true">
        <property name="styleSheet">
-        <string notr="true">QWidget#widgetRight{
+        <string notr="true">QWidget#widgetInfo{
          background-color: #FFFFFF;
  }</string>
        </property>
@@ -183,12 +183,12 @@ QSplitter#splitter::margin{
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+         <layout class="QVBoxLayout" name="layoutInfo" stretch="0,1">
           <property name="spacing">
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="labelInfo">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -207,10 +207,10 @@ QSplitter#splitter::margin{
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="widget" native="true">
+           <widget class="QWidget" name="widgetInfo2" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <widget class="QLabel" name="labelInfo">
+              <widget class="QLabel" name="labelInfoText">
                <property name="text">
                 <string/>
                </property>
@@ -226,19 +226,13 @@ QSplitter#splitter::margin{
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="widgetDR" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>10</width>
-         <height>10</height>
-        </size>
-       </property>
+      <widget class="QWidget" name="widgetConf" native="true">
        <property name="styleSheet">
-        <string notr="true">QWidget#widgetDR{
+        <string notr="true">QWidget#widgetConf{
          background-color: #FFFFFF;
  }</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -255,7 +249,121 @@ QSplitter#splitter::margin{
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="labelConf">
+          <property name="styleSheet">
+           <string notr="true">QLabel{
+	border: 2px solid rgb(26, 222, 209);
+	color: #FFFFFF;
+	background-color: rgb(26, 222, 209);
+}</string>
+          </property>
+          <property name="text">
+           <string>发放配置</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="widgetConf2" native="true">
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <item>
+            <layout class="QHBoxLayout" name="layoutRandQues" stretch="0,0,0,2">
+             <property name="spacing">
+              <number>7</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="cbbRandQues">
+               <property name="text">
+                <string>随机抽题</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spinBoxRandCnt">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelRandCnt">
+               <property name="text">
+                <string>个</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horSpacerRandQues">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cbbRandUpset">
+             <property name="text">
+              <string>随机打乱</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verSpacerConf">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="widgetAct" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget#widgetAct{
+         background-color: #FFFFFF;
+ }</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelAct">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -274,7 +382,7 @@ QSplitter#splitter::margin{
          </widget>
         </item>
         <item>
-         <widget class="QWidget" name="widgetAct" native="true">
+         <widget class="QWidget" name="widgetAct2" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <property name="spacing">
             <number>12</number>
@@ -297,6 +405,26 @@ QSplitter#splitter::margin{
               <string>添加题目</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnPush">
+             <property name="text">
+              <string>发放试卷</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verSpacerAct">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>

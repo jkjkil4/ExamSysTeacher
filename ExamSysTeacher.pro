@@ -34,6 +34,7 @@ SOURCES += \
         Ques/queswhether.cpp \
         SubWidget/editview.cpp \
         SubWidget/mainview.cpp \
+        SubWidget/pushview.cpp \
         Util/config.cpp \
         Widget/doubleslidebutton.cpp \
         main.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
         Ques/queswhether.h \
         SubWidget/editview.h \
         SubWidget/mainview.h \
+        SubWidget/pushview.h \
         Util/config.h \
         Util/header.h \
         Widget/doubleslidebutton.h \
@@ -63,6 +65,7 @@ FORMS += \
     SubWidget/addquesdialog.ui \
     SubWidget/editview.ui \
     SubWidget/mainview.ui \
+    SubWidget/pushview.ui \
     mainwindow.ui
 
 RESOURCES += \

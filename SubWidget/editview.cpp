@@ -23,9 +23,10 @@ EditView::EditView(QWidget *parent) :
     ui->setupUi(this);
 
     ui->splitter->setSizes(QList<int>() << 400 << 100);
-    ui->splitterRight->setSizes(QList<int>() << 300 << 100);
+    ui->splitterRight->setSizes(QList<int>() << 300 << 100 << 100);
 
     connect(ui->btnAdd, &QPushButton::clicked, this, &EditView::onAddClicked);
+    connect(ui->btnPush, SIGNAL(clicked()), this, SIGNAL(push()));
 
     QVBoxLayout *layoutScroll = new QVBoxLayout;
     layoutScroll->addLayout(mLayoutScrollItems);
@@ -94,7 +95,7 @@ void EditView::updateInfo() {
     QString info;
     info += "名称: " + mProjName + '\n';
     info += "题目量: " + QString::number(mLayoutScrollItems->count()) + '\n';
-    ui->labelInfo->setText(info);
+    ui->labelInfoText->setText(info);
 }
 
 void EditView::clearQues() {

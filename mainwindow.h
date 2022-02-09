@@ -5,6 +5,7 @@
 class QStackedLayout;
 class MainView;
 class EditView;
+class PushView;
 
 namespace Ui {
     class MainWindow;
@@ -47,6 +48,10 @@ public slots:
     void onLoadProj();
     /** @brief  用于响应保存试卷的信号 */
     void onSaveProj();
+
+    /** @brief  用于响应发放试卷信号 */
+    void onPush();
+
     /** @brief  用于响应"关于"的信号 */
     void onAbout();
     /** @brief  用于响应"关于Qt"的信号 */
@@ -64,4 +69,5 @@ private:
 
     MainView *mMainView;
     EditView *mEditView;
+    PushView *mPushView;
 };

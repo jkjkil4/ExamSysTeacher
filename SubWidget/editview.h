@@ -75,6 +75,7 @@ public slots:
 
 signals:
     void changed();
+    void push();
 
 public:
     void setProjName(const QString &projName);
