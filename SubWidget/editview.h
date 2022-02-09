@@ -48,9 +48,24 @@ public:
     void readQuesXml(const QDomElement &elem);
 
     /**
+     * @brief   使用XML方式对发放配置进行保存
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    void writeConfXml(QXmlStreamWriter &xml);
+    /**
+     * @brief   使用XML方式对发放配置进行读取
+     * @param   elem    QDomElement对象，用于读取XML
+     */
+    void readConfXml(const QDomElement &elem);
+
+    /**
      * @brief   更新信息
      */
     void updateInfo();
+    /**
+     * @brief   更新发放配置中抽取数量的范围
+     */
+    void updateConfRandCnt();
 
     /**
      * @brief   清空题目
@@ -72,6 +87,11 @@ public slots:
 
     /** @brief  响应添加题目事件 */
     void onAddClicked();
+    /**
+     * @brief   响应cbbRandQues事件
+     * @param   state   状态
+     */
+    void onRandQuesStateChanged(int state);
 
 signals:
     void changed();

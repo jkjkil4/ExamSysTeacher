@@ -102,6 +102,8 @@ bool MainWindow::loadProj(const QString &filePath) {
         QDomElement elem = node.toElement();
         if(elem.tagName() == "QuesList") {
             mEditView->readQuesXml(elem);
+        } else if(elem.tagName() == "QuesConf") {
+            mEditView->readConfXml(elem);
         }
         node = node.nextSibling();
     }
@@ -121,6 +123,7 @@ bool MainWindow::saveProj(const QString &filePath) {
     xml.writeStartElement("ExamSysProject");
     xml.writeAttribute("Version", QString::number(PROJ_VERSION));
     mEditView->writeQuesXml(xml);
+    mEditView->writeConfXml(xml);
     xml.writeEndElement();
     xml.writeEndDocument();
 
@@ -131,9 +134,16 @@ bool MainWindow::saveProj(const QString &filePath) {
 
 bool MainWindow::verifyClose() {
     int ret = QMessageBox::information(this, "提示", "文件未保存", "保存", "不保存", "取消");
-    if(ret == 0)
+    switch(ret) {
+    case 0:
+        mIsChanged = false;
         return saveProj(mProjPath);
-    return ret == 1;
+    case 1:
+        mIsChanged = false;
+        return true;
+    default:
+        return false;
+    }
 }
 
 void MainWindow::onNewProj() {
