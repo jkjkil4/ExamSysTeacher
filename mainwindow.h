@@ -52,6 +52,9 @@ public slots:
     /** @brief  用于响应"关于Qt"的信号 */
     void onAboutQt();
 
+protected:
+    void closeEvent(QCloseEvent *ev) override;
+
 private:    
     Ui::MainWindow *ui;
     QStackedLayout *mStkLayout;

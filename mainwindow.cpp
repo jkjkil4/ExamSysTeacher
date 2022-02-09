@@ -4,6 +4,7 @@
 // 控件相关
 #include <QStackedLayout>
 #include <QMessageBox>
+#include <QCloseEvent>
 
 // 文件相关
 #include <QFileDialog>
@@ -193,4 +194,9 @@ void MainWindow::onAbout() {
 }
 void MainWindow::onAboutQt() {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::closeEvent(QCloseEvent *ev) {
+    if(!verifyClose())
+        ev->ignore();
 }
