@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    mPushView->autoAdjustDateTime();
+
     mStkLayout->setMargin(0);
     mStkLayout->addWidget(mMainView);
     mStkLayout->addWidget(mEditView);
@@ -100,15 +102,19 @@ bool MainWindow::loadProj(const QString &filePath) {
     }
 
     QDomNode node = root.firstChild();
+    QDomElement elemQuesList;
+    QDomElement elemQuesConf;
     while(!node.isNull()) {
         QDomElement elem = node.toElement();
         if(elem.tagName() == "QuesList") {
-            mEditView->readQuesXml(elem);
+            elemQuesList = elem;
         } else if(elem.tagName() == "QuesConf") {
-            mEditView->readConfXml(elem);
+            elemQuesConf = elem;
         }
         node = node.nextSibling();
     }
+    mEditView->readQuesXml(elemQuesList);
+    mEditView->readConfXml(elemQuesConf);
 
     return true;
 }
@@ -206,7 +212,6 @@ void MainWindow::onPush() {
         return;
     mIsChanged = false;
 
-    mPushView->autoAdjustDateTime();
     mStkLayout->setCurrentWidget(mPushView);
 }
 
