@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(mEditView, &EditView::changed, [this] { mIsChanged = true; });
     connect(mEditView, &EditView::push, this, &MainWindow::onPush);
+
+    connect(mPushView, &PushView::back, [this] { mStkLayout->setCurrentWidget(mProjPath.isEmpty() ? (QWidget*)mMainView : mEditView); });
 }
 
 MainWindow::~MainWindow()
@@ -204,6 +206,7 @@ void MainWindow::onPush() {
         return;
     mIsChanged = false;
 
+    mPushView->autoAdjustDateTime();
     mStkLayout->setCurrentWidget(mPushView);
 }
 
