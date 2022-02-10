@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mEditView, &EditView::changed, [this] { mIsChanged = true; });
     connect(mEditView, &EditView::push, this, &MainWindow::onPush);
 
-    connect(mPushView, &PushView::back, [this] { mStkLayout->setCurrentWidget(mProjPath.isEmpty() ? (QWidget*)mMainView : mEditView); });
+    connect(mPushView, &PushView::back, this, &MainWindow::onPushViewBack);
 }
 
 MainWindow::~MainWindow()
@@ -212,7 +212,16 @@ void MainWindow::onPush() {
         return;
     mIsChanged = false;
 
+    ui->actNewProj->setEnabled(false);
+    ui->actLoadProj->setEnabled(false);
+    ui->actSaveProj->setEnabled(false);
     mStkLayout->setCurrentWidget(mPushView);
+}
+void MainWindow::onPushViewBack() {
+    ui->actNewProj->setEnabled(true);
+    ui->actLoadProj->setEnabled(true);
+    ui->actSaveProj->setEnabled(true);
+    mStkLayout->setCurrentWidget(mProjPath.isEmpty() ? (QWidget*)mMainView : mEditView);
 }
 
 void MainWindow::onAbout() {

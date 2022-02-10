@@ -51,6 +51,8 @@ public slots:
 
     /** @brief  用于响应发放试卷信号 */
     void onPush();
+    /** @brief  用于响应发放试卷控件中的返回按钮 */
+    void onPushViewBack();
 
     /** @brief  用于响应"关于"的信号 */
     void onAbout();
