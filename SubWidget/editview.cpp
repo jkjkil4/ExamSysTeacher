@@ -28,10 +28,6 @@ EditView::EditView(QWidget *parent) :
     connect(ui->btnAdd, &QPushButton::clicked, this, &EditView::onAddClicked);
     connect(ui->btnPush, SIGNAL(clicked()), this, SIGNAL(push()));
 
-    connect(ui->cbbRandQues, &QCheckBox::stateChanged, this, &EditView::onRandQuesStateChanged);
-    connect(ui->spinBoxRandCnt, QOverload<int>::of(&QSpinBox::valueChanged), [this](int) { emit changed(); });
-    connect(ui->cbbRandUpset, &QCheckBox::stateChanged, [this](int) { emit changed(); });
-
     QVBoxLayout *layoutScroll = new QVBoxLayout;
     layoutScroll->addLayout(mLayoutScrollItems);
     layoutScroll->addStretch();
@@ -59,7 +55,6 @@ Ques* EditView::createQues(const QMetaObject *pMetaObject) {
     updateIndex(mLayoutScrollItems->count() - 1);
 
     updateInfo();
-    updateConfRandCnt();
 
     return ques;
 }
@@ -94,24 +89,15 @@ void EditView::readQuesXml(const QDomElement &elem) {
     }
 
     updateInfo();
-    updateConfRandCnt();
 }
 
 void EditView::writeConfXml(QXmlStreamWriter &xml) {
-    xml.writeStartElement("QuesConf");
-    xml.writeAttribute("RandQues", QString::number(ui->cbbRandQues->isChecked()));
-    xml.writeAttribute("RandQuesCnt", QString::number(ui->spinBoxRandCnt->value()));
-    xml.writeAttribute("RandUpset", QString::number(ui->cbbRandUpset->isChecked()));
-    xml.writeEndElement();
+    Q_UNUSED(xml)
+    // TODO: ...
 }
 void EditView::readConfXml(const QDomElement &elem) {
-    blockSignals(true);
-
-    ui->cbbRandQues->setChecked(elem.attribute("RandQues").toInt());
-    ui->spinBoxRandCnt->setValue(elem.attribute("RandQuesCnt", "1").toInt());
-    ui->cbbRandUpset->setChecked(elem.attribute("RandUpset").toInt());
-
-    blockSignals(false);
+    Q_UNUSED(elem)
+    // TODO: ...
 }
 
 void EditView::updateInfo() {
@@ -119,9 +105,6 @@ void EditView::updateInfo() {
     info += "名称: " + mProjName + '\n';
     info += "题目量: " + QString::number(mLayoutScrollItems->count()) + '\n';
     ui->labelInfoText->setText(info);
-}
-void EditView::updateConfRandCnt() {
-    ui->spinBoxRandCnt->setRange(1, qMax(1, mLayoutScrollItems->count()));
 }
 
 void EditView::clearQues() {
@@ -133,12 +116,6 @@ void EditView::clearQues() {
 void EditView::clear() {
     clearQues();
     updateInfo();
-
-    blockSignals(true);
-    updateConfRandCnt();
-    ui->cbbRandQues->setChecked(false);
-    ui->cbbRandUpset->setChecked(false);
-    blockSignals(false);
 }
 
 void EditView::onDoubleClicked() {
@@ -193,7 +170,6 @@ void EditView::onCustomContextMenuRequested(const QPoint &) {
         delete mLayoutScrollItems->takeAt(ind);
 
         updateInfo();
-        updateConfRandCnt();
 
         emit changed();
     });
@@ -215,10 +191,6 @@ void EditView::onAddClicked() {
         createQues(availableQues[ui.cbbTypes->currentIndex()].pMetaObject);
         emit changed();
     }
-}
-void EditView::onRandQuesStateChanged(int state) {
-    ui->spinBoxRandCnt->setEnabled(state);
-    emit changed();
 }
 
 void EditView::setProjName(const QString &projName) {

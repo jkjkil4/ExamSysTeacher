@@ -131,7 +131,7 @@ QSplitter#splitter::margin{
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>500</width>
+              <width>291</width>
               <height>640</height>
              </rect>
             </property>
@@ -265,57 +265,6 @@ QSplitter#splitter::margin{
         <item>
          <widget class="QWidget" name="widgetConf2" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_8">
-           <item>
-            <layout class="QHBoxLayout" name="layoutRandQues" stretch="0,0,0,2">
-             <property name="spacing">
-              <number>7</number>
-             </property>
-             <item>
-              <widget class="QCheckBox" name="cbbRandQues">
-               <property name="text">
-                <string>随机抽题</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="spinBoxRandCnt">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="labelRandCnt">
-               <property name="text">
-                <string>个</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horSpacerRandQues">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="cbbRandUpset">
-             <property name="text">
-              <string>随机打乱</string>
-             </property>
-            </widget>
-           </item>
            <item>
             <spacer name="verSpacerConf">
              <property name="orientation">

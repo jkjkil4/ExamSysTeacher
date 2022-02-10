@@ -62,10 +62,6 @@ public:
      * @brief   更新信息
      */
     void updateInfo();
-    /**
-     * @brief   更新发放配置中抽取数量的范围
-     */
-    void updateConfRandCnt();
 
     /**
      * @brief   清空题目
@@ -87,11 +83,6 @@ public slots:
 
     /** @brief  响应添加题目事件 */
     void onAddClicked();
-    /**
-     * @brief   响应cbbRandQues事件
-     * @param   state   状态
-     */
-    void onRandQuesStateChanged(int state);
 
 signals:
     void changed();
