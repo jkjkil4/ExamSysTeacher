@@ -32,7 +32,7 @@ public:
      */
     virtual QAbstractButton* createBtn(const QString &str);
 
-private:
+protected:
     QLabel *mLabelQues;
     QVBoxLayout *mLayout, *mLayoutButtons;
 

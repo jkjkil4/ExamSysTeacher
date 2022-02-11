@@ -8,5 +8,6 @@ class QuesMultiChoice : public QuesChoice
 public:
     Q_INVOKABLE explicit QuesMultiChoice(QWidget *parent = nullptr);
 
+    QString isDone() override;
     QAbstractButton* createBtn(const QString &str) override;
 };

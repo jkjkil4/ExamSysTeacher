@@ -39,7 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->centralwidget->setLayout(mStkLayout);
 
     setWindowTitle("考试系统（教师端）");
-    resize(1240, 760);
 
     connect(ui->actNewProj, &QAction::triggered, this, &MainWindow::onNewProj);
     connect(ui->actLoadProj, &QAction::triggered, this, &MainWindow::onLoadProj);

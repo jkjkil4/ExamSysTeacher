@@ -31,6 +31,14 @@ public:
     virtual bool edit();
 
     /**
+     * @brief   返回是否完成编辑
+     * @return  返回的字符串
+     * 若返回的为空字符串，则完成
+     * 若返回的不为空字符串，则未完成，并且字符串表示相关提示
+     */
+    virtual QString isDone();
+
+    /**
      * @brief   使用XML方式对题目内容进行保存
      * @param   xml     QXmlStreamWriter对象，用于写入XML
      */

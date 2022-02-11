@@ -49,6 +49,10 @@ bool QuesWhether::edit() {
     return false;
 }
 
+QString QuesWhether::isDone() {
+    return mButton->state() == DoubleSlideButton::Mid ? "未选择选项" : QString();
+}
+
 void QuesWhether::writeXml(QXmlStreamWriter &xml) const {
     xml.writeStartElement("QuesWhether");
     xml.writeAttribute("State", QString::number(mButton->state()));

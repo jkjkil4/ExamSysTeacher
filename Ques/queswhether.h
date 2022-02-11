@@ -15,6 +15,7 @@ public:
     Q_INVOKABLE explicit QuesWhether(QWidget *parent = nullptr);
 
     bool edit() override;
+    QString isDone() override;
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
 

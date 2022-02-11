@@ -26,7 +26,7 @@ EditView::EditView(QWidget *parent) :
     ui->splitterRight->setSizes(QList<int>() << 300 << 100 << 100);
 
     connect(ui->btnAdd, &QPushButton::clicked, this, &EditView::onAddClicked);
-    connect(ui->btnPush, SIGNAL(clicked()), this, SIGNAL(push()));
+    connect(ui->btnPush, &QPushButton::clicked, this, &EditView::onPushClicked);
 
     QVBoxLayout *layoutScroll = new QVBoxLayout;
     layoutScroll->addLayout(mLayoutScrollItems);
@@ -191,6 +191,63 @@ void EditView::onAddClicked() {
         createQues(availableQues[ui.cbbTypes->currentIndex()].pMetaObject);
         emit changed();
     }
+}
+void EditView::onPushClicked() {
+    struct Unfinished { int ind; QString what; };
+    QList<Unfinished> listUnfinished;
+    int count = mLayoutScrollItems->count();
+    for(int i = 0; i < count; ++i) {
+        Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
+        QString what = ques->isDone();
+        if(!what.isEmpty()) {
+            listUnfinished << Unfinished{ i, what };
+        }
+    }
+
+    if(listUnfinished.isEmpty()) {
+        emit push();
+        return;
+    }
+
+    QVBoxLayout *layoutArea = new QVBoxLayout;
+    for(const Unfinished &unf : listUnfinished) {
+        QLabel *label = new QLabel(QString::number(unf.ind + 1) + '.');
+        label->setObjectName("left");
+        QLabel *labelWhat = new QLabel(unf.what);
+        labelWhat->adjustSize();
+        QHBoxLayout *layout = new QHBoxLayout;
+        layout->addWidget(label);
+        layout->addWidget(labelWhat, 1);
+        layoutArea->addLayout(layout);
+    }
+    layoutArea->addStretch();
+
+    QScrollArea *area = new QScrollArea;
+    area->setStyleSheet("QScrollArea{"
+                        "    background-color: white;"
+                        "}"
+                        "QLabel#left{"
+                        "    border: 2px solid rgb(26, 222, 209);"
+                        "    color: #FFFFFF;"
+                        "    background-color: rgb(26, 222, 209);"
+                        "}");
+    QWidget *areaWidget = new QWidget;
+    areaWidget->setObjectName("areaWidget");
+    areaWidget->setStyleSheet("QWidget#areaWidget{"
+                              "    background-color: white;"
+                              "}");
+    areaWidget->setLayout(layoutArea);
+    area->setWidget(areaWidget);
+
+    QHBoxLayout *layoutDialog = new QHBoxLayout;
+    layoutDialog->setMargin(0);
+    layoutDialog->addWidget(area);
+
+    QDialog dialog(this);
+    dialog.setWindowTitle("以下题目未完成");
+    dialog.setLayout(layoutDialog);
+    dialog.resize(300, 400);
+    dialog.exec();
 }
 
 void EditView::setProjName(const QString &projName) {

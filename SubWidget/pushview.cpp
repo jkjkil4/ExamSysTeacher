@@ -21,7 +21,7 @@ void PushView::autoAdjustDateTime() {
     QDateTime dateTime = QDateTime::currentDateTime();
     QTime time = dateTime.time();
     time.setHMS(time.hour(), 0, 0);
-    dateTime.setTime(time.addSecs(60 * 60));
-    ui->dateTimeEditStart->setDateTime(dateTime);
-    ui->dateTimeEditEnd->setDateTime(dateTime.addSecs(60 * 60));
+    dateTime.setTime(time);
+    ui->dateTimeEditStart->setDateTime(dateTime.addSecs(60 * 60));
+    ui->dateTimeEditEnd->setDateTime(dateTime.addSecs(2 * 60 * 60));
 }

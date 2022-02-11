@@ -131,7 +131,7 @@ QSplitter#splitter::margin{
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>291</width>
+              <width>500</width>
               <height>640</height>
              </rect>
             </property>

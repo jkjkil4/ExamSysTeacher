@@ -29,6 +29,9 @@ void Ques::setNumber(int num) {
 }
 
 bool Ques::edit() { return false; }
+
+QString Ques::isDone() { return QString(); }
+
 void Ques::writeXml(QXmlStreamWriter &) const {}
 void Ques::readXml(const QDomElement &) {}
 

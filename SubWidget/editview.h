@@ -83,6 +83,8 @@ public slots:
 
     /** @brief  响应添加题目事件 */
     void onAddClicked();
+    /** @brief  响应发放试卷按钮事件 */
+    void onPushClicked();
 
 signals:
     void changed();
