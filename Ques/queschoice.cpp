@@ -68,12 +68,14 @@ bool QuesChoice::edit() {
     });
 
     if(dialog.exec()) {
+        // 清空原有内容
         mList.clear();
         int btnCnt = mLayoutButtons->count();
         for(int i = 0; i < btnCnt; i++) {
             mLayoutButtons->itemAt(i)->widget()->deleteLater();
         }
 
+        // 重新创建选择按钮
         int count = ui.listWidget->count();
         for(int i = 0; i < count; ++i) {
             QString str = ui.listWidget->item(i)->text();
@@ -83,6 +85,7 @@ bool QuesChoice::edit() {
             mLayoutButtons->addWidget(btn);
         }
 
+        // 题目文字
         mText = ui.editQues->toPlainText();
         mLabelQues->setText(mHead + mText);
         return true;
@@ -95,6 +98,7 @@ void QuesChoice::writeXml(QXmlStreamWriter &xml) const {
     xml.writeAttribute("Ques", mText);
 
     int i = 0;
+    // 遍历所有的选项文字，存入XML
     for(const QString &str : mList) {
         QAbstractButton *ansBtn = (QAbstractButton*)mLayoutButtons->itemAt(i)->widget();
         xml.writeStartElement("Ans");
@@ -117,9 +121,11 @@ void QuesChoice::readXml(const QDomElement &elem) {
     mLabelQues->setText(mHead + mText);
 
     int i = 0;
+    // 遍历所有子节点
     QDomNode node = elem.firstChild();
     while(!node.isNull()) {
         QDomElement elem = node.toElement();
+        // 如果该节点名称为Ans，则读取文字并添加到选项中
         if(elem.tagName() == "Ans") {
             bool checked = elem.attribute("Checked").toInt();
             QString str = elem.text();

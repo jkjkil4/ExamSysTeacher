@@ -214,6 +214,7 @@ void MainWindow::onPush() {
     ui->actNewProj->setEnabled(false);
     ui->actLoadProj->setEnabled(false);
     ui->actSaveProj->setEnabled(false);
+    mPushView->setProjName(QFileInfo(mProjPath).completeBaseName());
     mStkLayout->setCurrentWidget(mPushView);
 }
 void MainWindow::onPushViewBack() {

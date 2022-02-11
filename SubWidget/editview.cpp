@@ -22,12 +22,15 @@ EditView::EditView(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // 配置splitter大小比例
     ui->splitter->setSizes(QList<int>() << 400 << 100);
     ui->splitterRight->setSizes(QList<int>() << 300 << 100 << 100);
 
+    // 绑定按钮信号与槽
     connect(ui->btnAdd, &QPushButton::clicked, this, &EditView::onAddClicked);
     connect(ui->btnPush, &QPushButton::clicked, this, &EditView::onPushClicked);
 
+    // 列表布局
     QVBoxLayout *layoutScroll = new QVBoxLayout;
     layoutScroll->addLayout(mLayoutScrollItems);
     layoutScroll->addStretch();
@@ -46,11 +49,14 @@ Ques* EditView::createQues(const QMetaObject *pMetaObject) {
     if(!ques)
         return nullptr;
 
+    // 设置自定义右键菜单
     ques->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    // 绑定信号与槽
     connect(ques, SIGNAL(changed()), this, SIGNAL(changed()));
     connect(ques, &Ques::doubleClicked, this, &EditView::onDoubleClicked);
     connect(ques, &Ques::customContextMenuRequested, this, &EditView::onCustomContextMenuRequested);
 
+    // 添加控件
     mLayoutScrollItems->addWidget(ques);
     updateIndex(mLayoutScrollItems->count() - 1);
 
@@ -66,6 +72,7 @@ void EditView::updateIndex(int ind, int val) {
 
 void EditView::writeQuesXml(QXmlStreamWriter &xml) {
     xml.writeStartElement("QuesList");
+    // 遍历所有题目控件，将题目写入XML
     int count = mLayoutScrollItems->count();
     for(int i = 0; i < count; ++i) {
         Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
@@ -75,6 +82,7 @@ void EditView::writeQuesXml(QXmlStreamWriter &xml) {
 }
 void EditView::readQuesXml(const QDomElement &elem) {
     clearQues();
+    // 遍历所有子节点
     QDomNode node = elem.firstChild();
     while(!node.isNull()) {
         QDomElement elem = node.toElement();
@@ -183,6 +191,7 @@ void EditView::onAddClicked() {
     Ui::AddQuesDialog ui;
     ui.setupUi(&dialog);
 
+    // 将所有题目类型添加到cbbTypes中
     for(const QuesType &qtype : availableQues) {
         ui.cbbTypes->addItem(qtype.name);
     }
@@ -194,6 +203,8 @@ void EditView::onAddClicked() {
 }
 void EditView::onPushClicked() {
     struct Unfinished { int ind; QString what; };
+
+    // 遍历题目检查是否有未完成的题目
     QList<Unfinished> listUnfinished;
     int count = mLayoutScrollItems->count();
     for(int i = 0; i < count; ++i) {
@@ -204,11 +215,13 @@ void EditView::onPushClicked() {
         }
     }
 
+    // 如果没有未完成的题目，则发出push()信号并退出函数
     if(listUnfinished.isEmpty()) {
         emit push();
         return;
     }
 
+    // 创建控件并显示
     QVBoxLayout *layoutArea = new QVBoxLayout;
     for(const Unfinished &unf : listUnfinished) {
         QLabel *label = new QLabel(QString::number(unf.ind + 1) + '.');

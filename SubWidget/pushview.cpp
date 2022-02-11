@@ -14,6 +14,7 @@ PushView::PushView(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // 初始化表头
     const QStringList horHeaderText = {
         "序号", "考生", "连接情况", "答题进度", "最后一次提交时间", "成绩"
     };
@@ -26,6 +27,7 @@ PushView::PushView(QWidget *parent) :
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
+    // 绑定按钮信号与槽
     connect(ui->btnImport, &QPushButton::clicked, this, &PushView::onImport);
     connect(ui->btnBack, SIGNAL(clicked()), this, SIGNAL(back()));
 }
@@ -52,6 +54,10 @@ bool PushView::listStuContains(const QString &name) {
     return false;
 }
 
+void PushView::setProjName(const QString &projName) {
+    ui->labelProjName->setText("试卷名称: " + projName);
+}
+
 void PushView::onImport() {
     Config config;
     QString filePath = QFileDialog::getOpenFileName(this, "导入考生列表", config.value("EST/ImportStuPath").toString());
@@ -68,6 +74,7 @@ void PushView::onImport() {
         return;
     }
 
+    // 读取文件的每一行
     while(!file.atEnd()) {
         QStringList list = QString(file.readLine()).split('|');
         if(list.size() < 2)
@@ -80,6 +87,7 @@ void PushView::onImport() {
 
     ui->tableWidget->setRowCount(mListStu.size());
 
+    // 添加表格物件
     int i = 0;
     for(const Stu &stu : mListStu) {
         QTableWidgetItem *itemInd = new QTableWidgetItem(QString::number(i + 1));
@@ -92,4 +100,8 @@ void PushView::onImport() {
 
         i++;
     }
+}
+
+void PushView::onPush() {
+
 }

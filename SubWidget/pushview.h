@@ -32,9 +32,17 @@ public:
      */
     bool listStuContains(const QString &name);
 
+    /**
+     * @brief   设置项目名称用于显示
+     * @param   projName    项目名称
+     */
+    void setProjName(const QString &projName);
+
 public slots:
     /** @brief  响应导入考生列表操作 */
     void onImport();
+    /** @brief  响应发放试卷操作 */
+    void onPush();
 
 signals:
     void back();

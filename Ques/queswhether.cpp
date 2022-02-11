@@ -38,8 +38,11 @@ bool QuesWhether::edit() {
     ui.editRight->setText(mLabelBtnRight->text());
 
     if(dialog.exec()) {
+        // 题目文字
         mText = ui.editQues->toPlainText();
         mLabelQues->setText("（判断题）" + mText);
+
+        // 按钮文字
         mLabelBtnLeft->setText(ui.editLeft->text());
         mLabelBtnRight->setText(ui.editRight->text());
 
