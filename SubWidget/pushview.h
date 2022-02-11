@@ -25,9 +25,23 @@ public:
      */
     void autoAdjustDateTime();
 
+    /**
+     * @brief   检查考生列表是否有重复元素
+     * @param   name    考生名称
+     * @return  是否重复
+     */
+    bool listStuContains(const QString &name);
+
+public slots:
+    /** @brief  响应导入考生列表操作 */
+    void onImport();
+
 signals:
     void back();
 
 private:
     Ui::PushView *ui;
+
+    struct Stu { QString name, pwd; };
+    QList<Stu> mListStu;
 };
