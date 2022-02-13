@@ -224,6 +224,11 @@ void MainWindow::onPushViewBack() {
 }
 void MainWindow::onExam(const QString &dirName) {
     ExamWidget *widget = new ExamWidget(dirName);
+    if(!widget->isVaild()) {
+        QMessageBox::critical(this, "错误", "操作失败");
+        delete widget;
+        return;
+    }
     widget->setAttribute(Qt::WA_DeleteOnClose);
     widget->show();
     mStkLayout->setCurrentWidget(mEditView);

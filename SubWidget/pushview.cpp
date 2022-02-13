@@ -145,13 +145,13 @@ void PushView::onPush() {
     }
 
     // 写入 exported.esep
-    QFile fileQuesList(dir.absoluteFilePath("exported.esep"));
-    if(!fileQuesList.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QFile fileExported(dir.absoluteFilePath("exported.esep"));
+    if(!fileExported.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "错误", "操作失败");
         return;
     }
     {   // 使用XML写入
-        QXmlStreamWriter xml(&fileQuesList);
+        QXmlStreamWriter xml(&fileExported);
         xml.writeStartDocument();
         xml.writeStartElement("ExamSysExportedProject");
         xml.writeAttribute("Name", ui->labelProjName->text());
@@ -162,7 +162,7 @@ void PushView::onPush() {
         xml.writeEndElement();
         xml.writeEndDocument();
     }
-    fileQuesList.close();
+    fileExported.close();
 
     // 写入 exported.ta
     QFile fileTrueAns(dir.absoluteFilePath("exported.ta"));
@@ -178,19 +178,19 @@ void PushView::onPush() {
     }
     fileTrueAns.close();
 
-    // 写入 exported.cl
-    QFile fileClientList(dir.absoluteFilePath("exported.cl"));
-    if(!fileClientList.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    // 写入 exported.sl
+    QFile fileStuList(dir.absoluteFilePath("exported.sl"));
+    if(!fileStuList.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "错误", "操作失败");
         return;
     }
     {   // 使用QTextStream写入
-        QTextStream out(&fileClientList);
+        QTextStream out(&fileStuList);
         for(const Stu& stu : mListStu) {
             out << stu.name << '|' << stu.pwd << '\n';
         }
     }
-    fileClientList.close();
+    fileStuList.close();
 
     emit exam(dirName);
 }
