@@ -19,12 +19,11 @@
 #include "SubWidget/editview.h"
 #include "SubWidget/pushview.h"
 #include "Util/config.h"
-#include "Util/header.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),
       mStkLayout(new QStackedLayout),
-      mMainView(new MainView(this)), mEditView(new EditView(this)), mPushView(new PushView(this))
+      mMainView(new MainView(this)), mEditView(new EditView(this)), mPushView(new PushView(mEditView, this))
 {
     ui->setupUi(this);
 
@@ -70,7 +69,6 @@ bool MainWindow::newProj(const QString &filePath) {
     QXmlStreamWriter xml(&file);
     xml.writeStartDocument();
     xml.writeStartElement("ExamSysProject");
-    xml.writeAttribute("Version", QString::number(PROJ_VERSION));
     xml.writeEndElement();
     xml.writeEndDocument();
 
@@ -128,7 +126,6 @@ bool MainWindow::saveProj(const QString &filePath) {
     xml.setAutoFormatting(true);
     xml.writeStartDocument();
     xml.writeStartElement("ExamSysProject");
-    xml.writeAttribute("Version", QString::number(PROJ_VERSION));
     mEditView->writeQuesXml(xml);
     mEditView->writeConfXml(xml);
     xml.writeEndElement();

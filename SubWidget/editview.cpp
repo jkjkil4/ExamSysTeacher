@@ -108,6 +108,25 @@ void EditView::readConfXml(const QDomElement &elem) {
     // TODO: ...
 }
 
+void EditView::writeExportedQuesXml(QXmlStreamWriter &xml) {
+    xml.writeStartElement("QuesList");
+    // 遍历所有题目控件，将导出题目写入XML
+    int count = mLayoutScrollItems->count();
+    for(int i = 0; i < count; ++i) {
+        Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
+        ques->writeExportedQuesXml(xml);
+    }
+    xml.writeEndElement();
+}
+void EditView::writeTrueAnsXml(QXmlStreamWriter &xml) {
+    // 遍历所有题目控件，将答案写入XML
+    int count = mLayoutScrollItems->count();
+    for(int i = 0; i < count; ++i) {
+        Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
+        xml.writeTextElement(ques->ansType(), ques->trueAns());
+    }
+}
+
 void EditView::updateInfo() {
     QString info;
     info += "名称: " + mProjName + '\n';
@@ -118,7 +137,9 @@ void EditView::updateInfo() {
 void EditView::clearQues() {
     int count = mLayoutScrollItems->count();
     for(int i = 0; i < count; ++i) {
-        mLayoutScrollItems->takeAt(0)->widget()->deleteLater();
+        QLayoutItem *item = mLayoutScrollItems->takeAt(0);
+        item->widget()->deleteLater();
+        delete item;
     }
 }
 void EditView::clear() {
@@ -175,7 +196,9 @@ void EditView::onCustomContextMenuRequested(const QPoint &) {
         for(int i = ind + 1; i < count; ++i) {
             updateIndex(i, i - 1);
         }
-        delete mLayoutScrollItems->takeAt(ind);
+        QLayoutItem *item = mLayoutScrollItems->takeAt(ind);
+        delete item->widget();
+        delete item;
 
         updateInfo();
 

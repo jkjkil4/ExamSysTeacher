@@ -59,6 +59,17 @@ public:
     void readConfXml(const QDomElement &elem);
 
     /**
+     * @brief   使用XML方式写入导出试卷
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    void writeExportedQuesXml(QXmlStreamWriter &xml);
+    /**
+     * @brief   使用XML方式写入答案
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    void writeTrueAnsXml(QXmlStreamWriter &xml);
+
+    /**
      * @brief   更新信息
      */
     void updateInfo();

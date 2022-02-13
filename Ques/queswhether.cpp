@@ -70,3 +70,10 @@ void QuesWhether::readXml(const QDomElement &elem) {
     mText = elem.text();
     mLabelQues->setText("（判断题）" + mText);
 }
+
+void QuesWhether::writeExportedQuesXml(QXmlStreamWriter &xml) {
+    xml.writeTextElement("QuesWhether", mText);
+}
+QString QuesWhether::trueAns() {
+    return QString::number(mButton->state());
+}

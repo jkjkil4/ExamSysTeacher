@@ -17,6 +17,9 @@ public:
     bool edit() override;
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
+    void writeExportedQuesXml(QXmlStreamWriter &xml) override;
+
+    QString trueAns() override;
 
     /**
      * @brief   通过数字序号得到对应的字母序号

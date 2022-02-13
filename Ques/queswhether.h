@@ -18,6 +18,8 @@ public:
     QString isDone() override;
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
+    void writeExportedQuesXml(QXmlStreamWriter &xml) override;
+    QString trueAns() override;
 
 private:
     QLabel *mLabelQues;

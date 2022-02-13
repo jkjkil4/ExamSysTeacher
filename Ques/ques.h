@@ -49,6 +49,25 @@ public:
      */
     virtual void readXml(const QDomElement &elem);
 
+    /**
+     * @brief   使用XML方式写入导出试卷
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    virtual void writeExportedQuesXml(QXmlStreamWriter &xml);
+
+    /**
+     * @brief   返回答案类型
+     * @return  答案类型
+     */
+    virtual QString ansType();
+    /**
+     * @brief   返回正确答案
+     * @return  正确答案
+     * 若 ansType() 为 "str"  则trueAns表示答案字符串
+     * 若 ansType() 为 "call" 则trueAns表示调用函数名
+     */
+    virtual QString trueAns();
+
 protected:
     void mouseDoubleClickEvent(QMouseEvent *ev) override;
 

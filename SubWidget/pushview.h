@@ -6,6 +6,8 @@ namespace Ui {
 class PushView;
 }
 
+class EditView;
+
 /**
  * @brief   发放试卷页面
  */
@@ -14,7 +16,7 @@ class PushView : public QWidget
     Q_OBJECT
 
 public:
-    explicit PushView(QWidget *parent = nullptr);
+    explicit PushView(EditView *editView, QWidget *parent = nullptr);
     ~PushView();
 
     /**
@@ -49,6 +51,7 @@ signals:
 
 private:
     Ui::PushView *ui;
+    EditView *mEditView;
 
     struct Stu { QString name, pwd; };
     QList<Stu> mListStu;

@@ -139,6 +139,25 @@ void QuesChoice::readXml(const QDomElement &elem) {
         node = node.nextSibling();
     }
 }
+void QuesChoice::writeExportedQuesXml(QXmlStreamWriter &xml) {
+    xml.writeStartElement(metaObject()->className());
+    xml.writeAttribute("Ques", mText);
+    // 写入选项列表
+    for(const QString &str : mList) {
+        xml.writeTextElement("Ans", str);
+    }
+    xml.writeEndElement();
+}
+QString QuesChoice::trueAns() {
+    QString ans;
+    int count = mLayoutButtons->count();
+    for(int i = 0; i < count; ++i) {
+        QAbstractButton *btn = (QAbstractButton*)mLayoutButtons->itemAt(i)->widget();
+        if(btn->isChecked())
+            ans += QString::number(i) + ';';
+    }
+    return ans;
+}
 
 QString QuesChoice::numToLetter(int num) {
     QString res;

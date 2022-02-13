@@ -34,6 +34,10 @@ QString Ques::isDone() { return QString(); }
 
 void Ques::writeXml(QXmlStreamWriter &) const {}
 void Ques::readXml(const QDomElement &) {}
+void Ques::writeExportedQuesXml(QXmlStreamWriter &) {}
+
+QString Ques::ansType() { return "str"; }
+QString Ques::trueAns() { return ""; }
 
 void Ques::mouseDoubleClickEvent(QMouseEvent *ev) {
     if(ev->button() == Qt::LeftButton)

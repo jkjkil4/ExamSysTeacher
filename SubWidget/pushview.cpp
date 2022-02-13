@@ -4,19 +4,25 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <QTextStream>
+#include <QXmlStreamWriter>
+
 #include <QDateTime>
+#include <QCryptographicHash>
 
+#include "Util/header.h"
 #include "Util/config.h"
+#include "editview.h"
 
-PushView::PushView(QWidget *parent) :
+PushView::PushView(EditView *editView, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PushView)
+    ui(new Ui::PushView), mEditView(editView)
 {
     ui->setupUi(this);
 
     // 初始化表头
     const QStringList horHeaderText = {
-        "序号", "考生", "连接情况", "答题进度", "最后一次提交时间", "成绩"
+        "序号", "考生"
     };
     ui->tableWidget->setColumnCount(horHeaderText.size());
     int i = 0;
@@ -30,6 +36,7 @@ PushView::PushView(QWidget *parent) :
     // 绑定按钮信号与槽
     connect(ui->btnImport, &QPushButton::clicked, this, &PushView::onImport);
     connect(ui->btnBack, SIGNAL(clicked()), this, SIGNAL(back()));
+    connect(ui->btnPush, &QPushButton::clicked, this, &PushView::onPush);
 }
 
 PushView::~PushView()
@@ -55,7 +62,7 @@ bool PushView::listStuContains(const QString &name) {
 }
 
 void PushView::setProjName(const QString &projName) {
-    ui->labelProjName->setText("试卷名称: " + projName);
+    ui->labelProjName->setText(projName);
 }
 
 void PushView::onImport() {
@@ -84,6 +91,7 @@ void PushView::onImport() {
             continue;
         mListStu << Stu{ name, list[1].trimmed() };
     }
+    file.close();
 
     ui->tableWidget->setRowCount(mListStu.size());
 
@@ -103,5 +111,83 @@ void PushView::onImport() {
 }
 
 void PushView::onPush() {
+    // 检查列表是否为空
+    if(mListStu.isEmpty()) {
+        QMessageBox::warning(this, "错误", "考生列表为空");
+        return;
+    }
 
+    // 检查时间
+    QDateTime currentTime = QDateTime::currentDateTime();
+    if(ui->dateTimeEditEnd->dateTime() < ui->dateTimeEditStart->dateTime()) {
+        QMessageBox::warning(this, "错误", "结束时间不得早于开始时间");
+        return;
+    }
+    if(ui->dateTimeEditEnd->dateTime() < currentTime) {
+        QMessageBox::warning(this, "错误", "结束时间不得早于当前时间");
+        return;
+    }
+
+    // 目录名
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    hash.addData(QByteArray::number(currentTime.date().toJulianDay()));
+    hash.addData(QByteArray::number(currentTime.time().msecsSinceStartOfDay()));
+    hash.addData(ui->labelProjName->text().toUtf8());
+    QString dirName(hash.result().toHex());
+
+    // 创建目录
+    QDir dir(APP_DIR);
+    QString path = "Exported/" + dirName;
+    dir.mkpath(path);
+    if(!dir.cd(path)) {
+        QMessageBox::critical(this, "错误", "操作失败");
+        return;
+    }
+
+    // 写入 exported.esep
+    QFile fileQuesList(dir.absoluteFilePath("exported.esep"));
+    if(!fileQuesList.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "错误", "操作失败");
+        return;
+    }
+    {   // 使用XML写入
+        QXmlStreamWriter xml(&fileQuesList);
+        xml.writeStartDocument();
+        xml.writeStartElement("ExamSysExportedProject");
+        xml.writeAttribute("StartDateTime", ui->dateTimeEditStart->dateTime().toString("yyyy-M-d H.m.s"));
+        xml.writeAttribute("EndDateTime", ui->dateTimeEditEnd->dateTime().toString("yyyy-M-d H.m.s"));
+        xml.writeAttribute("ScoreInClient", QString::number(ui->cbbScoreInClient->isChecked()));
+        mEditView->writeExportedQuesXml(xml);
+        xml.writeEndElement();
+        xml.writeEndDocument();
+    }
+    fileQuesList.close();
+
+    // 写入 exported.ta
+    QFile fileTrueAns(dir.absoluteFilePath("exported.ta"));
+    if(!fileTrueAns.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "错误", "操作失败");
+        return;
+    }
+    {   // 使用XML写入
+        QXmlStreamWriter xml(&fileTrueAns);
+        xml.writeStartDocument();
+        mEditView->writeTrueAnsXml(xml);
+        xml.writeEndDocument();
+    }
+    fileTrueAns.close();
+
+    // 写入 exported.cl
+    QFile fileClientList(dir.absoluteFilePath("exported.cl"));
+    if(!fileClientList.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "错误", "操作失败");
+        return;
+    }
+    {   // 使用QTextStream写入
+        QTextStream out(&fileClientList);
+        for(const Stu& stu : mListStu) {
+            out << stu.name << '|' << stu.pwd << '\n';
+        }
+    }
+    fileClientList.close();
 }
