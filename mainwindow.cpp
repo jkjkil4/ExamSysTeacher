@@ -18,6 +18,7 @@
 #include "SubWidget/mainview.h"
 #include "SubWidget/editview.h"
 #include "SubWidget/pushview.h"
+#include "Widget/examwidget.h"
 #include "Util/config.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mEditView, &EditView::push, this, &MainWindow::onPush);
 
     connect(mPushView, &PushView::back, this, &MainWindow::onPushViewBack);
+    connect(mPushView, &PushView::exam, this, &MainWindow::onExam);
 }
 
 MainWindow::~MainWindow()
@@ -218,7 +220,13 @@ void MainWindow::onPushViewBack() {
     ui->actNewProj->setEnabled(true);
     ui->actLoadProj->setEnabled(true);
     ui->actSaveProj->setEnabled(true);
-    mStkLayout->setCurrentWidget(mProjPath.isEmpty() ? (QWidget*)mMainView : mEditView);
+    mStkLayout->setCurrentWidget(mEditView);
+}
+void MainWindow::onExam(const QString &dirName) {
+    ExamWidget *widget = new ExamWidget(dirName);
+    widget->setAttribute(Qt::WA_DeleteOnClose);
+    widget->show();
+    mStkLayout->setCurrentWidget(mEditView);
 }
 
 void MainWindow::onAbout() {

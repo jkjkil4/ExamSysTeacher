@@ -48,6 +48,7 @@ public slots:
 
 signals:
     void back();
+    void exam(const QString &dirName);
 
 private:
     Ui::PushView *ui;

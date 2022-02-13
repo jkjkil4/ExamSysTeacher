@@ -49,10 +49,15 @@ public slots:
     /** @brief  用于响应保存试卷的信号 */
     void onSaveProj();
 
-    /** @brief  用于响应发放试卷信号 */
+    /** @brief  用于响应发放试卷信号（进入PushView） */
     void onPush();
     /** @brief  用于响应发放试卷控件中的返回按钮 */
     void onPushViewBack();
+    /**
+     * @brief   用于响应发放试卷信号（创建ExamWidget）
+     * @param   dirName     目录名
+     */
+    void onExam(const QString &dirName);
 
     /** @brief  用于响应"关于"的信号 */
     void onAbout();

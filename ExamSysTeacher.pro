@@ -37,6 +37,7 @@ SOURCES += \
         SubWidget/pushview.cpp \
         Util/config.cpp \
         Widget/doubleslidebutton.cpp \
+        Widget/examwidget.cpp \
         main.cpp \
         mainwindow.cpp
 
@@ -52,6 +53,7 @@ HEADERS += \
         Util/config.h \
         Util/header.h \
         Widget/doubleslidebutton.h \
+        Widget/examwidget.h \
         mainwindow.h
 
 # Default rules for deployment.
@@ -66,6 +68,7 @@ FORMS += \
     SubWidget/editview.ui \
     SubWidget/mainview.ui \
     SubWidget/pushview.ui \
+    Widget/examwidget.ui \
     mainwindow.ui
 
 RESOURCES += \

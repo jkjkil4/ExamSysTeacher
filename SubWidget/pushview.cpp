@@ -154,8 +154,9 @@ void PushView::onPush() {
         QXmlStreamWriter xml(&fileQuesList);
         xml.writeStartDocument();
         xml.writeStartElement("ExamSysExportedProject");
-        xml.writeAttribute("StartDateTime", ui->dateTimeEditStart->dateTime().toString("yyyy-M-d H.m.s"));
-        xml.writeAttribute("EndDateTime", ui->dateTimeEditEnd->dateTime().toString("yyyy-M-d H.m.s"));
+        xml.writeAttribute("Name", ui->labelProjName->text());
+        xml.writeAttribute("StartDateTime", ui->dateTimeEditStart->dateTime().toString("yyyy/M/d H:m:s"));
+        xml.writeAttribute("EndDateTime", ui->dateTimeEditEnd->dateTime().toString("yyyy/M/d H:m:s"));
         xml.writeAttribute("ScoreInClient", QString::number(ui->cbbScoreInClient->isChecked()));
         mEditView->writeExportedQuesXml(xml);
         xml.writeEndElement();
@@ -190,4 +191,6 @@ void PushView::onPush() {
         }
     }
     fileClientList.close();
+
+    emit exam(dirName);
 }
