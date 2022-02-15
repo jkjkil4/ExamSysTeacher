@@ -5,16 +5,24 @@
 #include <QTextStream>
 
 #include "Util/header.h"
+#include "Ques/quessinglechoice.h"
+#include "Ques/quesmultichoice.h"
+#include "Ques/queswhether.h"
 
-ExamWidget::ExamWidget(const QString &dirName, QWidget *parent)
+#include <QDebug>
+
+ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     : QWidget(parent), ui(new Ui::ExamWidget),
-      mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName)
+      mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName), mHasEnd(hasEnd),
+      availableQues({
+                    {"QuesSingleChoice", &QuesSingleChoiceData::staticMetaObject},
+                    {"QuesMultiChoice", &QuesMultiChoiceData::staticMetaObject},
+                    {"QuesWhether", &QuesWhetherData::staticMetaObject}
+                    })
 {
     ui->setupUi(this);
-    setEnabled(false);
 
-    // 读取信息
-    QFile fileExported(mDirPath + "/exported.esep");
+    QFile fileExported(mDirPath + "/_.esep");
     if(fileExported.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QDomDocument doc;
         do {
@@ -23,44 +31,71 @@ ExamWidget::ExamWidget(const QString &dirName, QWidget *parent)
             QDomElement root = doc.documentElement();
             if(root.tagName() != "ExamSysExportedProject")
                 break;
-            QDomNode nodeQuesList = root.elementsByTagName("QuesList").item(0);
-            if(nodeQuesList.isNull())
+            QDomElement elemQuesList, elemStuList;
+            QDomNode node = root.firstChild();
+            while(!node.isNull()) {
+                QDomElement elem = node.toElement();
+                if(!elem.isNull()) {
+                    if(elem.tagName() == "QuesList") {
+                        elemQuesList = elem;
+                    } else if(elem.tagName() == "StuList") {
+                        elemStuList = elem;
+                    }
+                }
+                node = node.nextSibling();
+            }
+            if(elemQuesList.isNull() || elemStuList.isNull())
                 break;
+
+            // 读取信息
+            const QString dateTimeFmt = "yyyy/M/d H:m:s";
             mName = root.attribute("Name");
-            mDateTimeStart = QDateTime::fromString(root.attribute("StartDateTime"), "yyyy/M/d H:m:s");
-            mDateTimeEnd = QDateTime::fromString(root.attribute("EndDateTime"), "yyyy/M/d H:m:s");
+            mDateTimeStart = QDateTime::fromString(root.attribute("StartDateTime"), dateTimeFmt);
+            mDateTimeEnd = QDateTime::fromString(root.attribute("EndDateTime"), dateTimeFmt);
             mScoreInClient = root.attribute("ScoreInClient").toInt();
-            mQuesCnt = nodeQuesList.childNodes().count();
+
+            // 读取题目列表
+            node = elemQuesList.firstChild();
+            while(!node.isNull()) {
+                QDomElement elem = node.toElement();
+                if(!elem.isNull()) {
+                    auto iter = availableQues.constFind(elem.tagName());
+                    do {
+                        if(iter == availableQues.cend())
+                            break;
+                        QuesData *data = (QuesData*)iter.value()->newInstance(Q_ARG(QObject*, this));
+                        if(!data)
+                            break;
+                        data->readXml(elem);
+                        qDebug() << data->metaObject()->className();
+                        mListQues << data;
+                    } while(false);
+                }
+                node = node.nextSibling();
+            }
+
+            // 读取考生列表
+            node = elemStuList.firstChild();
+            while(!node.isNull()) {
+                QDomElement elem = node.toElement();
+                if(!elem.isNull() && elem.tagName() == "v") {
+                    QString name = elem.text();
+                    if(!name.isEmpty())
+                        mListStu << Stu{ name, elem.attribute("Pwd") };
+                    qDebug() << name << elem.attribute("Pwd");
+                }
+                node = node.nextSibling();
+            }
+
             mIsVaild = true;
         } while(false);
-        fileExported.close();
-    }
-
-    if(!mIsVaild)
-        return;
-
-    // 读取考生列表
-    mIsVaild = false;
-    QFile fileStuList(mDirPath + "/exported.sl");
-    if(fileStuList.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&fileStuList);
-        while(!in.atEnd()) {
-            QStringList list = in.readLine().split('|');
-            if(list.size() < 2)
-                continue;
-            mListStu.append(Stu{ list[0], list[1] });
-        }
-        mIsVaild = true;
-        fileStuList.close();
     }
 
     if(!mIsVaild)
         return;
 
     // 配置控件
-    setEnabled(true);
     ui->labelExamName->setText(mName);
-    ui->labelQuesCnt->setText(QString::number(mQuesCnt));
     ui->labelStartDateTime->setText(mDateTimeStart.toString("yyyy/M/d HH:mm:ss"));
     ui->labelEndDateTime->setText(mDateTimeEnd.toString("yyyy/M/d HH:mm:ss"));
     ui->labelScoreInClient->setText(mScoreInClient ? "是" : "否");
@@ -109,4 +144,19 @@ ExamWidget::ExamWidget(const QString &dirName, QWidget *parent)
     }
 
     setWindowTitle(mName);
+    updateState();
 }
+
+void ExamWidget::updateState() {
+    QDateTime currentTime = QDateTime::currentDateTime();
+    if(mHasEnd || currentTime > mDateTimeEnd) {
+        ui->labelState->setText("已结束");
+        return;
+    }
+    if(currentTime < mDateTimeStart) {
+        ui->labelState->setText("未开始");
+        return;
+    }
+    ui->labelState->setText("进行中");
+}
+

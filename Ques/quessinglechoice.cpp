@@ -3,10 +3,12 @@
 #include <QRadioButton>
 #include <QVBoxLayout>
 
-QuesSingleChoice::QuesSingleChoice(QWidget *parent) : QuesChoice("（单选题）", parent)
-{
+QuesSingleChoiceData::QuesSingleChoiceData(QObject *parent)
+    : QuesChoiceData("QuesSingleChoice", parent) {}
 
-}
+
+QuesSingleChoice::QuesSingleChoice(QWidget *parent)
+    : QuesChoice("QuesSingleChoice", "（单选题）", parent) {}
 
 QString QuesSingleChoice::isDone() {
     int count = mLayoutButtons->count();

@@ -3,10 +3,12 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 
-QuesMultiChoice::QuesMultiChoice(QWidget *parent) : QuesChoice("（多选题）", parent)
-{
+QuesMultiChoiceData::QuesMultiChoiceData(QObject *parent)
+    : QuesChoiceData("QuesMultiChoice", parent) {}
 
-}
+
+QuesMultiChoice::QuesMultiChoice(QWidget *parent)
+    : QuesChoice("QuesMultiChoice", "（多选题）", parent) {}
 
 QString QuesMultiChoice::isDone() {
     int count = mLayoutButtons->count();

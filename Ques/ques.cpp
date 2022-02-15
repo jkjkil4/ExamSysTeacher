@@ -5,6 +5,10 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 
+QuesData::QuesData(QObject *parent) : QObject(parent) {}
+void QuesData::writeXml(QXmlStreamWriter &) const {}
+void QuesData::readXml(const QDomElement &) {}
+
 Ques::Ques(QWidget *parent)
     : QWidget(parent),
       mLabelNum(new QLabel("0.")), mFrame(new QFrame), mLayoutMain(new QHBoxLayout)
@@ -34,10 +38,6 @@ QString Ques::isDone() { return QString(); }
 
 void Ques::writeXml(QXmlStreamWriter &) const {}
 void Ques::readXml(const QDomElement &) {}
-void Ques::writeExportedQuesXml(QXmlStreamWriter &) {}
-
-QString Ques::ansType() { return "str"; }
-QString Ques::trueAns() { return ""; }
 
 void Ques::mouseDoubleClickEvent(QMouseEvent *ev) {
     if(ev->button() == Qt::LeftButton)

@@ -2,6 +2,13 @@
 
 #include "queschoice.h"
 
+class QuesSingleChoiceData : public QuesChoiceData
+{
+    Q_OBJECT
+public:
+    Q_INVOKABLE explicit QuesSingleChoiceData(QObject *parent = nullptr);
+};
+
 class QuesSingleChoice : public QuesChoice
 {
     Q_OBJECT

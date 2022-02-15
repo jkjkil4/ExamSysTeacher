@@ -1,9 +1,23 @@
 #pragma once
 
 #include "ques.h"
+#include "Widget/doubleslidebutton.h"
 
 class QVBoxLayout;
-class DoubleSlideButton;
+
+class QuesWhetherData : public QuesData
+{
+    Q_OBJECT
+public:
+    Q_INVOKABLE explicit QuesWhetherData(QObject *parent = nullptr);
+
+    void writeXml(QXmlStreamWriter &xml) const override;
+    void readXml(const QDomElement &elem) override;
+
+    QString mQuesText;
+    QString mTextLeft, mTextRight;
+    DoubleSlideButton::State mState;
+};
 
 /**
  * @brief   判断题
@@ -18,8 +32,8 @@ public:
     QString isDone() override;
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
-    void writeExportedQuesXml(QXmlStreamWriter &xml) override;
-    QString trueAns() override;
+
+    void updateWidgetsByData();
 
 private:
     QLabel *mLabelQues;
@@ -28,5 +42,5 @@ private:
     QHBoxLayout *mLayoutButton;
     QVBoxLayout *mLayout;
 
-    QString mText;
+    QuesWhetherData mData;
 };

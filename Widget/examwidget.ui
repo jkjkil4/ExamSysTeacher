@@ -118,24 +118,6 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="layoutQuesCnt" stretch="0,1">
-          <item>
-           <widget class="QLabel" name="labelQuesCntText">
-            <property name="text">
-             <string>题目数:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="labelQuesCnt">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="layoutStartDateTime" stretch="0,1">
           <item>
            <widget class="QLabel" name="labelStartDateTimeText">
@@ -182,6 +164,24 @@
           </item>
           <item>
            <widget class="QLabel" name="labelScoreInClient">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="layoutState" stretch="0,1">
+          <item>
+           <widget class="QLabel" name="labelStateText">
+            <property name="text">
+             <string>状态:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelState">
             <property name="text">
              <string/>
             </property>

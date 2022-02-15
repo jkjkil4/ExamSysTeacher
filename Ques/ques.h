@@ -10,8 +10,29 @@ class QXmlStreamWriter;
 class QDomElement;
 
 /**
- * @brief 题目基类
+ * @brief 题目数据基类
  * 定义了 writeXml readXml 等虚函数和其他函数
+ */
+class QuesData : public QObject
+{
+    Q_OBJECT
+public:
+    Q_INVOKABLE explicit QuesData(QObject *parent = nullptr);
+
+    /**
+     * @brief   使用XML方式对题目内容进行保存
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    virtual void writeXml(QXmlStreamWriter &xml) const;
+    /**
+     * @brief   使用XML方式对题目内容进行读取
+     * @param   elem    QDomElement对象，用于读取XML
+     */
+    virtual void readXml(const QDomElement &elem);
+};
+
+/**
+ * @brief 题目控件基类
  */
 class Ques : public QWidget
 {
@@ -38,35 +59,8 @@ public:
      */
     virtual QString isDone();
 
-    /**
-     * @brief   使用XML方式对题目内容进行保存
-     * @param   xml     QXmlStreamWriter对象，用于写入XML
-     */
     virtual void writeXml(QXmlStreamWriter &xml) const;
-    /**
-     * @brief   使用XML方式对题目内容进行读取
-     * @param   elem    QDomElement对象，用于读取XML
-     */
     virtual void readXml(const QDomElement &elem);
-
-    /**
-     * @brief   使用XML方式写入导出试卷
-     * @param   xml     QXmlStreamWriter对象，用于写入XML
-     */
-    virtual void writeExportedQuesXml(QXmlStreamWriter &xml);
-
-    /**
-     * @brief   返回答案类型
-     * @return  答案类型
-     */
-    virtual QString ansType();
-    /**
-     * @brief   返回正确答案
-     * @return  正确答案
-     * 若 ansType() 为 "str"  则trueAns表示答案字符串
-     * 若 ansType() 为 "call" 则trueAns表示调用函数名
-     */
-    virtual QString trueAns();
 
 protected:
     void mouseDoubleClickEvent(QMouseEvent *ev) override;

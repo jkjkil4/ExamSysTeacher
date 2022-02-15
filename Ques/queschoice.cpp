@@ -9,10 +9,48 @@
 #include <QXmlStreamWriter>
 #include <QDomDocument>
 
-QuesChoice::QuesChoice(const QString &head, QWidget *parent)
+QuesChoiceData::QuesChoiceData(const QString &quesName, QObject *parent)
+    : QuesData(parent), quesName(quesName) {}
+void QuesChoiceData::writeXml(QXmlStreamWriter &xml) const {
+    xml.writeStartElement(quesName);
+    xml.writeAttribute("Ques", quesText);
+
+    int i = 0;
+    // 遍历所有的选项文字，存入XML
+    for(const Choice& choice : choiceList) {
+        xml.writeStartElement("Ans");
+        xml.writeAttribute("Checked", QString::number(choice.isChecked));
+        xml.writeCharacters(choice.text);
+        xml.writeEndElement();
+        i++;
+    }
+
+    xml.writeEndElement();
+}
+void QuesChoiceData::readXml(const QDomElement &elem) {
+    choiceList.clear();
+    quesText = elem.attribute("Ques");
+
+    // 遍历所有子节点
+    QDomNode node = elem.firstChild();
+    while(!node.isNull()) {
+        QDomElement elem = node.toElement();
+        // 如果该节点名称为Ans，则读取文字并添加到选项中
+        if(elem.tagName() == "Ans") {
+            bool checked = elem.attribute("Checked").toInt();
+            QString str = elem.text();
+            choiceList << Choice{ checked, str };
+        }
+        node = node.nextSibling();
+    }
+}
+
+
+QuesChoice::QuesChoice(const QString &quesName, const QString &head, QWidget *parent)
     : Ques(parent),
-      mLabelQues(new QLabel(head)), mLayout(new QVBoxLayout), mLayoutButtons(new QVBoxLayout),
-      mHead(head)
+      mLabelQues(new QLabel(head)),
+      mLayout(new QVBoxLayout), mLayoutButtons(new QVBoxLayout),
+      mHead(head), mData(quesName)
 {
     mLabelQues->setWordWrap(true);
 
@@ -27,9 +65,9 @@ bool QuesChoice::edit() {
     Ui::QuesChoiceEditDialog ui;
     ui.setupUi(&dialog);
     dialog.setWindowTitle("编辑题目" + mHead);
-    ui.editQues->setPlainText(mText);
-    for(const QString &str : mList) {
-        QListWidgetItem *item = new QListWidgetItem(str);
+    ui.editQues->setPlainText(mData.quesText);
+    for(const QuesChoiceData::Choice &choice : mData.choiceList) {
+        QListWidgetItem *item = new QListWidgetItem(choice.text);
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         ui.listWidget->addItem(item);
     }
@@ -69,94 +107,30 @@ bool QuesChoice::edit() {
 
     if(dialog.exec()) {
         // 清空原有内容
-        mList.clear();
-        int btnCnt = mLayoutButtons->count();
-        for(int i = 0; i < btnCnt; i++) {
-            mLayoutButtons->itemAt(i)->widget()->deleteLater();
-        }
+        mData.choiceList.clear();
 
-        // 重新创建选择按钮
+        // 重新设定 choiceList
         int count = ui.listWidget->count();
         for(int i = 0; i < count; ++i) {
             QString str = ui.listWidget->item(i)->text();
-            mList << str;
-            QAbstractButton *btn = createBtn(numToLetter(i) + ". " + str);
-            connect(btn, &QAbstractButton::toggled, this, [this](bool) { emit changed(); });
-            mLayoutButtons->addWidget(btn);
+            mData.choiceList << QuesChoiceData::Choice{ false, str };
         }
 
         // 题目文字
-        mText = ui.editQues->toPlainText();
-        mLabelQues->setText(mHead + mText);
+        mData.quesText = ui.editQues->toPlainText();
+
+        updateWidgetsByData();
         return true;
     }
     return false;
 }
 
 void QuesChoice::writeXml(QXmlStreamWriter &xml) const {
-    xml.writeStartElement(metaObject()->className());
-    xml.writeAttribute("Ques", mText);
-
-    int i = 0;
-    // 遍历所有的选项文字，存入XML
-    for(const QString &str : mList) {
-        QAbstractButton *ansBtn = (QAbstractButton*)mLayoutButtons->itemAt(i)->widget();
-        xml.writeStartElement("Ans");
-        xml.writeAttribute("Checked", QString::number(ansBtn->isChecked()));
-        xml.writeCharacters(str);
-        xml.writeEndElement();
-        i++;
-    }
-
-    xml.writeEndElement();
+    mData.writeXml(xml);
 }
 void QuesChoice::readXml(const QDomElement &elem) {
-    mList.clear();
-    int btnCnt = mLayoutButtons->count();
-    for(int i = 0; i < btnCnt; i++) {
-        mLayoutButtons->itemAt(i)->widget()->deleteLater();
-    }
-
-    mText = elem.attribute("Ques");
-    mLabelQues->setText(mHead + mText);
-
-    int i = 0;
-    // 遍历所有子节点
-    QDomNode node = elem.firstChild();
-    while(!node.isNull()) {
-        QDomElement elem = node.toElement();
-        // 如果该节点名称为Ans，则读取文字并添加到选项中
-        if(elem.tagName() == "Ans") {
-            bool checked = elem.attribute("Checked").toInt();
-            QString str = elem.text();
-            mList << str;
-            QAbstractButton *btn = createBtn(numToLetter(i) + ". " + str);
-            btn->setChecked(checked);
-            connect(btn, &QAbstractButton::toggled, this, [this](bool) { emit changed(); });
-            mLayoutButtons->addWidget(btn);
-            i++;
-        }
-        node = node.nextSibling();
-    }
-}
-void QuesChoice::writeExportedQuesXml(QXmlStreamWriter &xml) {
-    xml.writeStartElement(metaObject()->className());
-    xml.writeAttribute("Ques", mText);
-    // 写入选项列表
-    for(const QString &str : mList) {
-        xml.writeTextElement("Ans", str);
-    }
-    xml.writeEndElement();
-}
-QString QuesChoice::trueAns() {
-    QString ans;
-    int count = mLayoutButtons->count();
-    for(int i = 0; i < count; ++i) {
-        QAbstractButton *btn = (QAbstractButton*)mLayoutButtons->itemAt(i)->widget();
-        if(btn->isChecked())
-            ans += QString::number(i) + ';';
-    }
-    return ans;
+    mData.readXml(elem);
+    updateWidgetsByData();
 }
 
 QString QuesChoice::numToLetter(int num) {
@@ -166,6 +140,28 @@ QString QuesChoice::numToLetter(int num) {
         num /= 26;
     } while(num);
     return res;
+}
+
+void QuesChoice::updateWidgetsByData() {
+    // 题目文字
+    mLabelQues->setText(mHead + mData.quesText);
+
+    // 按钮
+    int count = mLayoutButtons->count();
+    for(int i = 0; i < count; ++i) {
+        mLayoutButtons->itemAt(i)->widget()->deleteLater();
+    }
+    int i = 0;
+    for(const QuesChoiceData::Choice &choice : mData.choiceList) {
+        QAbstractButton *btn = createBtn(numToLetter(i) + ". " + choice.text);
+        btn->setChecked(choice.isChecked);
+        connect(btn, &QAbstractButton::toggled, this, [this, i](bool checked) {
+            mData.choiceList[i].isChecked = checked;
+            emit changed();
+        });
+        mLayoutButtons->addWidget(btn);
+        ++i;
+    }
 }
 
 QAbstractButton* QuesChoice::createBtn(const QString &) { return nullptr; }

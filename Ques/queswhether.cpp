@@ -6,7 +6,24 @@
 #include <QXmlStreamWriter>
 #include <QDomDocument>
 
-#include "Widget/doubleslidebutton.h"
+QuesWhetherData::QuesWhetherData(QObject *parent)
+    : QuesData(parent) {}
+
+void QuesWhetherData::writeXml(QXmlStreamWriter &xml) const {
+    xml.writeStartElement("QuesWhether");
+    xml.writeAttribute("LTxt", mTextLeft);
+    xml.writeAttribute("RTxt", mTextRight);
+    xml.writeAttribute("State", QString::number(mState));
+    xml.writeCharacters(mQuesText);
+    xml.writeEndElement();
+}
+void QuesWhetherData::readXml(const QDomElement &elem) {
+    mTextLeft = elem.attribute("LTxt");
+    mTextRight = elem.attribute("RTxt");
+    mState = (DoubleSlideButton::State)elem.attribute("State").toInt();
+    mQuesText = elem.text();
+}
+
 
 QuesWhether::QuesWhether(QWidget *parent)
     : Ques(parent),
@@ -33,19 +50,19 @@ bool QuesWhether::edit() {
     QDialog dialog(this);
     Ui::QuesWhetherDialog ui;
     ui.setupUi(&dialog);
-    ui.editQues->setPlainText(mText);
-    ui.editLeft->setText(mLabelBtnLeft->text());
-    ui.editRight->setText(mLabelBtnRight->text());
+    ui.editQues->setPlainText(mData.mQuesText);
+    ui.editLeft->setText(mData.mTextLeft);
+    ui.editRight->setText(mData.mTextRight);
 
     if(dialog.exec()) {
         // 题目文字
-        mText = ui.editQues->toPlainText();
-        mLabelQues->setText("（判断题）" + mText);
+        mData.mQuesText = ui.editQues->toPlainText();
 
         // 按钮文字
-        mLabelBtnLeft->setText(ui.editLeft->text());
-        mLabelBtnRight->setText(ui.editRight->text());
+        mData.mTextLeft = ui.editLeft->text();
+        mData.mTextRight = ui.editRight->text();
 
+        updateWidgetsByData();
         return true;
     }
 
@@ -57,23 +74,18 @@ QString QuesWhether::isDone() {
 }
 
 void QuesWhether::writeXml(QXmlStreamWriter &xml) const {
-    xml.writeStartElement("QuesWhether");
-    xml.writeAttribute("State", QString::number(mButton->state()));
-    xml.writeCharacters(mText);
-    xml.writeEndElement();
+    mData.writeXml(xml);
 }
 
 void QuesWhether::readXml(const QDomElement &elem) {
-    mButton->blockSignals(true);
-    mButton->setState((DoubleSlideButton::State)elem.attribute("State").toInt());
-    mButton->blockSignals(false);
-    mText = elem.text();
-    mLabelQues->setText("（判断题）" + mText);
+    mData.readXml(elem);
+    updateWidgetsByData();
 }
 
-void QuesWhether::writeExportedQuesXml(QXmlStreamWriter &xml) {
-    xml.writeTextElement("QuesWhether", mText);
+void QuesWhether::updateWidgetsByData() {
+    mLabelQues->setText("（判断题）" + mData.mQuesText);
+    mLabelBtnLeft->setText(mData.mTextLeft);
+    mLabelBtnRight->setText(mData.mTextRight);
+    mButton->setState((DoubleSlideButton::State)mData.mState);
 }
-QString QuesWhether::trueAns() {
-    return QString::number(mButton->state());
-}
+

@@ -7,6 +7,7 @@ class PushView;
 }
 
 class EditView;
+class QXmlStreamWriter;
 
 /**
  * @brief   发放试卷页面
@@ -39,6 +40,17 @@ public:
      * @param   projName    项目名称
      */
     void setProjName(const QString &projName);
+
+    /**
+     * @brief   通过XML写入发放属性
+     * @param   xml     QXmlStreamWriter对象
+     */
+    void writeAttributesXml(QXmlStreamWriter &xml);
+    /**
+     * @brief   通过XML写入学生列表
+     * @param   xml     QXmlStreamWriter对象
+     */
+    void writeStuListXml(QXmlStreamWriter &xml);
 
 public slots:
     /** @brief  响应导入考生列表操作 */

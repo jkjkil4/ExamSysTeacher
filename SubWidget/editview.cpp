@@ -82,6 +82,7 @@ void EditView::writeQuesXml(QXmlStreamWriter &xml) {
 }
 void EditView::readQuesXml(const QDomElement &elem) {
     clearQues();
+    blockSignals(true);
     // 遍历所有子节点
     QDomNode node = elem.firstChild();
     while(!node.isNull()) {
@@ -95,6 +96,7 @@ void EditView::readQuesXml(const QDomElement &elem) {
         }
         node = node.nextSibling();
     }
+    blockSignals(false);
 
     updateInfo();
 }
@@ -106,25 +108,6 @@ void EditView::writeConfXml(QXmlStreamWriter &xml) {
 void EditView::readConfXml(const QDomElement &elem) {
     Q_UNUSED(elem)
     // TODO: ...
-}
-
-void EditView::writeExportedQuesXml(QXmlStreamWriter &xml) {
-    xml.writeStartElement("QuesList");
-    // 遍历所有题目控件，将导出题目写入XML
-    int count = mLayoutScrollItems->count();
-    for(int i = 0; i < count; ++i) {
-        Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
-        ques->writeExportedQuesXml(xml);
-    }
-    xml.writeEndElement();
-}
-void EditView::writeTrueAnsXml(QXmlStreamWriter &xml) {
-    // 遍历所有题目控件，将答案写入XML
-    int count = mLayoutScrollItems->count();
-    for(int i = 0; i < count; ++i) {
-        Ques *ques = (Ques*)mLayoutScrollItems->itemAt(i)->widget();
-        xml.writeTextElement(ques->ansType(), ques->trueAns());
-    }
 }
 
 void EditView::updateInfo() {
