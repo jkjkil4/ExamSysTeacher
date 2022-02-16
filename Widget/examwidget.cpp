@@ -2,17 +2,21 @@
 #include "ui_examwidget.h"
 
 #include <QDomDocument>
+#include <QXmlStreamWriter>
 #include <QTextStream>
+
+#include <QUdpSocket>
+#include <QTcpServer>
+#include <QNetworkInterface>
 
 #include "Util/header.h"
 #include "Ques/quessinglechoice.h"
 #include "Ques/quesmultichoice.h"
 #include "Ques/queswhether.h"
 
-#include <QDebug>
-
 ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     : QWidget(parent), ui(new Ui::ExamWidget),
+      mUdpSocket(new QUdpSocket(this)), mTcpServer(new QTcpServer(this)),
       mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName), mHasEnd(hasEnd),
       availableQues({
                     {"QuesSingleChoice", &QuesSingleChoiceData::staticMetaObject},
@@ -67,7 +71,6 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
                         if(!data)
                             break;
                         data->readXml(elem);
-                        qDebug() << data->metaObject()->className();
                         mListQues << data;
                     } while(false);
                 }
@@ -82,17 +85,29 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
                     QString name = elem.text();
                     if(!name.isEmpty())
                         mListStu << Stu{ name, elem.attribute("Pwd") };
-                    qDebug() << name << elem.attribute("Pwd");
                 }
                 node = node.nextSibling();
             }
 
-            mIsVaild = true;
+            mError = NoError;
         } while(false);
     }
 
-    if(!mIsVaild)
+    if(mError != NoError)
         return;
+
+    // 配置 udp
+    if(!mUdpSocket->bind(40565, QUdpSocket::ShareAddress)) {
+        mError = UdpBindError;
+        return;
+    }
+    connect(mUdpSocket, &QUdpSocket::readyRead, this, &ExamWidget::onUdpReadyRead);
+
+    // 配置 tcp
+    if(!mTcpServer->listen()) {
+        mError = TcpListenError;
+        return;
+    }
 
     // 配置控件
     ui->labelExamName->setText(mName);
@@ -158,5 +173,38 @@ void ExamWidget::updateState() {
         return;
     }
     ui->labelState->setText("进行中");
+}
+
+void ExamWidget::onUdpReadyRead_SearchServer(const QDomElement &elem) {
+    QByteArray array;
+    QXmlStreamWriter xml(&array);
+    xml.writeStartDocument();
+    xml.writeStartElement("ESDatagram");
+    xml.writeAttribute("Type", "SearchServerRetval");
+    xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
+    xml.writeCharacters(mTcpServer->serverAddress().toString());
+    xml.writeEndElement();
+    xml.writeEndDocument();
+    mUdpSocket->writeDatagram(array, QHostAddress(elem.text()), 40565);
+}
+
+void ExamWidget::onUdpReadyRead() {
+    QByteArray datagram;
+    while (mUdpSocket->hasPendingDatagrams()) {
+        datagram.resize(int(mUdpSocket->pendingDatagramSize()));
+        mUdpSocket->readDatagram(datagram.data(), datagram.size());
+        qDebug() << datagram;
+        QDomDocument doc;
+        if(!doc.setContent(datagram))
+            continue;
+        QDomElement root = doc.documentElement();
+        if(root.tagName() != "ESDatagram")
+            continue;
+
+        QString type = root.attribute("Type");
+        if(type == "SearchServer") {
+            onUdpReadyRead_SearchServer(root);
+        }
+    }
 }
 
