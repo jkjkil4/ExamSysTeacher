@@ -97,7 +97,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         return;
 
     // 配置 udp
-    if(!mUdpSocket->bind(40565, QUdpSocket::ShareAddress)) {
+    if(!mUdpSocket->bind(40565, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint)) {
         mError = UdpBindError;
         return;
     }
@@ -108,6 +108,17 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         mError = TcpListenError;
         return;
     }
+
+    // 获取本机IP
+    QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
+    for(const QHostAddress &address : qAsConst(addresses)) {
+        if(address != QHostAddress::LocalHost && address.toIPv4Address()) {
+            mAddress = address;
+            break;
+        }
+    }
+    if(mAddress.isNull())
+        mAddress = QHostAddress::LocalHost;
 
     // 配置控件
     ui->labelExamName->setText(mName);
@@ -181,8 +192,9 @@ void ExamWidget::onUdpReadyRead_SearchServer(const QDomElement &elem) {
     xml.writeStartDocument();
     xml.writeStartElement("ESDatagram");
     xml.writeAttribute("Type", "SearchServerRetval");
+    xml.writeAttribute("Address", mAddress.toString());
     xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
-    xml.writeCharacters(mTcpServer->serverAddress().toString());
+    xml.writeCharacters(ui->labelExamName->text());
     xml.writeEndElement();
     xml.writeEndDocument();
     mUdpSocket->writeDatagram(array, QHostAddress(elem.text()), 40565);
@@ -193,7 +205,6 @@ void ExamWidget::onUdpReadyRead() {
     while (mUdpSocket->hasPendingDatagrams()) {
         datagram.resize(int(mUdpSocket->pendingDatagramSize()));
         mUdpSocket->readDatagram(datagram.data(), datagram.size());
-        qDebug() << datagram;
         QDomDocument doc;
         if(!doc.setContent(datagram))
             continue;

@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QMetaEnum>
+
 // 控件相关
 #include <QStackedLayout>
 #include <QMessageBox>
@@ -225,12 +227,19 @@ void MainWindow::onPushViewBack() {
 void MainWindow::onExam(const QString &dirName) {
     ExamWidget *widget = new ExamWidget(dirName);
     if(widget->error() != ExamWidget::NoError) {
-        QMessageBox::critical(this, "错误", widget->error() == ExamWidget::UdpBindError ? "网络错误\n请检查防火墙等设置" : "操作失败");
+        QMessageBox::critical(
+                    this, "错误",
+                    widget->error() & ExamWidget::NetworkError
+                    ? QString("网络错误 %1\n请检查防火墙等设置").arg(QMetaEnum::fromType<ExamWidget::Error>().valueToKey(widget->error()))
+                    : "操作失败");
         delete widget;
         return;
     }
     widget->setAttribute(Qt::WA_DeleteOnClose);
     widget->show();
+    ui->actNewProj->setEnabled(true);
+    ui->actLoadProj->setEnabled(true);
+    ui->actSaveProj->setEnabled(true);
     mStkLayout->setCurrentWidget(mEditView);
 }
 

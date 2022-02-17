@@ -24,7 +24,14 @@ class ExamWidget : public QWidget
     Q_OBJECT
 public:
     enum State { BeforeProc, Proc, AfterProc };
-    enum Error { NoError, NormalError, UdpBindError, TcpListenError };
+    enum Error {
+        NoError = 0,
+        NormalError = 0x01,
+        UdpBindError = 0x02,
+        TcpListenError = 0x04,
+        NetworkError = UdpBindError | TcpListenError
+    };
+    Q_ENUM(Error)
 
     explicit ExamWidget(const QString &dirName, bool hasEnd = false, QWidget *parent = nullptr);
 
@@ -49,6 +56,7 @@ private:
     bool mHasEnd;
 
     Error mError = NormalError;
+    QHostAddress mAddress;
 
     QString mName;
     QDateTime mDateTimeStart, mDateTimeEnd;
