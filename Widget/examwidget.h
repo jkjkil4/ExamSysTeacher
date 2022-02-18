@@ -15,6 +15,7 @@ class QuesData;
 class QDomElement;
 class QUdpSocket;
 class QTcpServer;
+class QTcpSocket;
 
 /**
  * @brief   考试控制窗口
@@ -34,6 +35,7 @@ public:
     Q_ENUM(Error)
 
     explicit ExamWidget(const QString &dirName, bool hasEnd = false, QWidget *parent = nullptr);
+    ~ExamWidget() override;
 
     Error error() { return mError; }
 
@@ -42,29 +44,52 @@ public:
      */
     void updateState();
 
-    void onUdpReadyRead_SearchServer(const QDomElement &elem);
+    void setIsConnected(const QString &stuName, bool isConnected);
+
+    void udpSendVerifyErr(const QString &what, const QHostAddress &address);
+    void udpSendVerifySucc(const QHostAddress &address);
 
 public slots:
     /** @brief  用于响应udp接收消息事件 */
     void onUdpReadyRead();
 
+public:
+    void onUdpReadyRead_SearchServer(const QDomElement &elem);
+
+public slots:
+    /** @brief  用于响应tcp连入消息 */
+    void onNewConnection();
+
 private:
+    // 界面
     Ui::ExamWidget *ui;
+
+    // 网络Socket
     QUdpSocket *mUdpSocket;
     QTcpServer *mTcpServer;
-    QString mDirName, mDirPath;
-    bool mHasEnd;
 
+    // 目录相关
+    QString mDirName, mDirPath;
+
+    // 基本属性
+    bool mHasEnd;
     Error mError = NormalError;
     QHostAddress mAddress;
 
+    // 考试信息
     QString mName;
     QDateTime mDateTimeStart, mDateTimeEnd;
     bool mScoreInClient;
 
+    // 题目列表
     QMap<QString, const QMetaObject *> availableQues;
     QVector<QuesData*> mListQues;
 
+    // 学生信息
     struct Stu { QString name, pwd; };
     QList<Stu> mListStu;
+    const Stu* findStu(const QString &name);
+
+    // 学生客户端
+    QMap<QTcpSocket*, QString> mMapStuClient;
 };

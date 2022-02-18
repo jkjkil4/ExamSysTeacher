@@ -1,12 +1,16 @@
 #include "examwidget.h"
 #include "ui_examwidget.h"
 
+#include <QTimer>
+#include <QCryptographicHash>
+
 #include <QDomDocument>
 #include <QXmlStreamWriter>
 #include <QTextStream>
 
 #include <QUdpSocket>
 #include <QTcpServer>
+#include <QTcpSocket>
 #include <QNetworkInterface>
 
 #include "Util/header.h"
@@ -108,6 +112,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         mError = TcpListenError;
         return;
     }
+    connect(mTcpServer, &QTcpServer::newConnection, this, &ExamWidget::onNewConnection);
 
     // 获取本机IP
     QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
@@ -173,6 +178,12 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     updateState();
 }
 
+ExamWidget::~ExamWidget() {
+    for(auto iter = mMapStuClient.cbegin(); iter != mMapStuClient.cend(); ++iter) {
+        iter.key()->disconnectFromHost();
+    }
+}
+
 void ExamWidget::updateState() {
     QDateTime currentTime = QDateTime::currentDateTime();
     if(mHasEnd || currentTime > mDateTimeEnd) {
@@ -186,18 +197,39 @@ void ExamWidget::updateState() {
     ui->labelState->setText("进行中");
 }
 
-void ExamWidget::onUdpReadyRead_SearchServer(const QDomElement &elem) {
+void ExamWidget::setIsConnected(const QString &stuName, bool isConnected) {\
+    // 遍历每一行
+    int rowCount = ui->tableWidget->rowCount();
+    for(int i = 0; i < rowCount; ++i) {
+        // 找到考生名字相符的
+        if(ui->tableWidget->item(i, 1)->text() == stuName) {
+            // 设置连接状态文字
+            ui->tableWidget->item(i, 2)->setText(isConnected ? "已连接" : "未连接");
+            break;
+        }
+    }
+}
+
+void ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &address) {
     QByteArray array;
     QXmlStreamWriter xml(&array);
     xml.writeStartDocument();
     xml.writeStartElement("ESDatagram");
-    xml.writeAttribute("Type", "SearchServerRetval");
-    xml.writeAttribute("Address", mAddress.toString());
-    xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
-    xml.writeCharacters(ui->labelExamName->text());
+    xml.writeAttribute("Type", "VerifyErr");
+    xml.writeCharacters(what);
     xml.writeEndElement();
     xml.writeEndDocument();
-    mUdpSocket->writeDatagram(array, QHostAddress(elem.text()), 40565);
+    mUdpSocket->writeDatagram(array, address, 40565);
+}
+void ExamWidget::udpSendVerifySucc(const QHostAddress &address) {
+    QByteArray array;
+    QXmlStreamWriter xml(&array);
+    xml.writeStartDocument();
+    xml.writeStartElement("ESDatagram");
+    xml.writeAttribute("Type", "VerifySucc");
+    xml.writeEndElement();
+    xml.writeEndDocument();
+    mUdpSocket->writeDatagram(array, address, 40565);
 }
 
 void ExamWidget::onUdpReadyRead() {
@@ -217,5 +249,86 @@ void ExamWidget::onUdpReadyRead() {
             onUdpReadyRead_SearchServer(root);
         }
     }
+}
+void ExamWidget::onUdpReadyRead_SearchServer(const QDomElement &elem) {
+    QByteArray array;
+    QXmlStreamWriter xml(&array);
+    xml.writeStartDocument();
+    xml.writeStartElement("ESDatagram");
+    xml.writeAttribute("Type", "SearchServerRetval");
+    xml.writeAttribute("Address", mAddress.toString());
+    xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
+    xml.writeCharacters(ui->labelExamName->text());
+    xml.writeEndElement();
+    xml.writeEndDocument();
+    mUdpSocket->writeDatagram(array, QHostAddress(elem.text()), 40565);
+}
+
+void ExamWidget::onNewConnection() {
+    QTcpSocket *client = mTcpServer->nextPendingConnection();
+    QString stuName;
+    {   // 验证密码
+        QObject obj;
+        QEventLoop eventLoop;
+        bool verified = false;
+
+        QTimer::singleShot(10000, &obj, [&eventLoop] { eventLoop.quit(); });
+        connect(client, &QTcpSocket::readyRead, &obj, [this, client, &stuName, &eventLoop, &verified] {
+            do {
+                // 读取xml
+                QDomDocument doc;
+                if(!doc.setContent(client->readAll()))
+                    break;
+                QDomElement root = doc.documentElement();
+                if(root.tagName() != "ESDatagram" || root.attribute("Type") != "TcpVerify")
+                    break;
+
+                // 判断考生是否存在
+                stuName = root.attribute("StuName");
+                const Stu *stu = findStu(stuName);
+                if(!stu) {
+                    udpSendVerifyErr("考生不存在", client->peerAddress());
+                    break;
+                }
+
+                // 验证密码
+                uint salt = root.attribute("Salt").toUInt();
+                QByteArray verify;
+                QDataStream ds(&verify, QIODevice::WriteOnly);
+                ds << client->peerAddress().toIPv4Address() << client->peerPort() << stu->pwd << salt;
+                if(QCryptographicHash::hash(verify, QCryptographicHash::Md5).toHex() != root.text()) {
+                    udpSendVerifyErr("密码错误", client->peerAddress());
+                    break;
+                }
+
+                verified = true;
+            } while(false);
+
+            eventLoop.quit();
+        });
+
+        eventLoop.exec();
+
+        if(!verified) {
+            client->disconnectFromHost();
+            return;
+        }
+        udpSendVerifySucc(client->peerAddress());
+    }
+
+    mMapStuClient[client] = stuName;
+    setIsConnected(stuName, true);
+    connect(client, &QTcpSocket::disconnected, this, [this, client, stuName] {
+        mMapStuClient.remove(client);
+        setIsConnected(stuName, false);
+    });
+}
+
+const ExamWidget::Stu* ExamWidget::findStu(const QString &name) {
+    for(const Stu &stu : mListStu) {
+        if(stu.name == name)
+            return &stu;
+    }
+    return nullptr;
 }
 
