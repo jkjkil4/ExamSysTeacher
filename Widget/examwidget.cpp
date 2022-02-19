@@ -215,7 +215,7 @@ bool ExamWidget::parseUdpDatagram(const QByteArray &array) {
     if(!doc.setContent(array))
         return false;
     QDomElement root = doc.documentElement();
-    if(root.tagName() != "ESDatagram")
+    if(root.tagName() != "ESDtg")
         return false;
 
     QString type = root.attribute("Type");
@@ -223,7 +223,7 @@ bool ExamWidget::parseUdpDatagram(const QByteArray &array) {
         QByteArray array;
         QXmlStreamWriter xml(&array);
         xml.writeStartDocument();
-        xml.writeStartElement("ESDatagram");
+        xml.writeStartElement("ESDtg");
         xml.writeAttribute("Type", "SearchServerRetval");
         xml.writeAttribute("Address", mAddress.toString());
         xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
@@ -241,12 +241,28 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
     if(!doc.setContent(array))
         return false;
     QDomElement root = doc.documentElement();
-    if(root.tagName() != "ESDatagram")
+    if(root.tagName() != "ESDtg")
         return false;
 
     QString type = root.attribute("Type");
-    Q_UNUSED(client)
-    Q_UNUSED(type)
+    if(type == "ExamDataRequest") {
+        QByteArray array;
+        QXmlStreamWriter xml(&array);
+        xml.writeStartDocument();
+        xml.writeStartElement("ESDtg");
+        xml.writeAttribute("Type", "ExamData");
+
+        // 写入试卷列表
+        xml.writeStartElement("QuesList");
+        for(const QuesData *ques : mListQues) {
+            ques->writeXmlWithoutTrueAns(xml);
+        }
+        xml.writeEndElement();
+
+        xml.writeEndElement();
+        xml.writeEndDocument();
+        tcpSendDatagram(client, array);
+    }
 
     return true;
 }
@@ -255,7 +271,7 @@ qint64 ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &add
     QByteArray array;
     QXmlStreamWriter xml(&array);
     xml.writeStartDocument();
-    xml.writeStartElement("ESDatagram");
+    xml.writeStartElement("ESDtg");
     xml.writeAttribute("Type", "VerifyErr");
     xml.writeCharacters(what);
     xml.writeEndElement();
@@ -266,16 +282,6 @@ qint64 ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &add
 qint64 ExamWidget::tcpSendDatagram(QTcpSocket *client, const QByteArray &array) {
     int len = array.length();
     return client->write(QByteArray((char*)&len, 4) + array);
-}
-qint64 ExamWidget::tcpSendVerifySucc(QTcpSocket *client) {
-    QByteArray array;
-    QXmlStreamWriter xml(&array);
-    xml.writeStartDocument();
-    xml.writeStartElement("ESDatagram");
-    xml.writeAttribute("Type", "VerifySucc");
-    xml.writeEndElement();
-    xml.writeEndDocument();
-    return tcpSendDatagram(client, array);
 }
 
 void ExamWidget::onUdpReadyRead() {
@@ -291,11 +297,13 @@ void ExamWidget::onNewConnection() {
     QTcpSocket *client = mTcpServer->nextPendingConnection();
     QString stuName;
     {   // 验证密码
-        QObject obj;
-        QEventLoop eventLoop;
+        QObject obj;            // 用于临时槽函数
+        QEventLoop eventLoop;   // 用于阻塞执行
         bool verified = false;
 
-        QTimer::singleShot(10000, &obj, [&eventLoop] { eventLoop.quit(); });
+        // 6s超时
+        QTimer::singleShot(6000, &obj, [&eventLoop] { eventLoop.quit(); });
+        // 绑定信号与槽接收消息，进行验证
         connect(client, &QTcpSocket::readyRead, &obj, [this, client, &stuName, &eventLoop, &verified] {
             do {
                 // 读取xml
@@ -303,7 +311,7 @@ void ExamWidget::onNewConnection() {
                 if(!doc.setContent(client->readAll()))
                     break;
                 QDomElement root = doc.documentElement();
-                if(root.tagName() != "ESDatagram" || root.attribute("Type") != "TcpVerify")
+                if(root.tagName() != "ESDtg" || root.attribute("Type") != "TcpVerify")
                     break;
 
                 // 判断考生是否存在
@@ -332,13 +340,24 @@ void ExamWidget::onNewConnection() {
 
         eventLoop.exec();
 
+        // 如果验证失败，则使client断开并结束函数调用
         if(!verified) {
             client->disconnectFromHost();
             return;
         }
-        tcpSendVerifySucc(client);
+
+        // 发送验证成功消息
+        QByteArray array;
+        QXmlStreamWriter xml(&array);
+        xml.writeStartDocument();
+        xml.writeStartElement("ESDtg");
+        xml.writeAttribute("Type", "VerifySucc");
+        xml.writeEndElement();
+        xml.writeEndDocument();
+        tcpSendDatagram(client, array);
     }
 
+    // 设置相关内容
     mMapStuClient[client] = stuName;
     setIsConnected(stuName, true);
     connect(client, &QTcpSocket::readyRead, this, &ExamWidget::onTcpReadyRead);

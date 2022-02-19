@@ -52,7 +52,6 @@ public:
     qint64 udpSendVerifyErr(const QString &what, const QHostAddress &address);
 
     qint64 tcpSendDatagram(QTcpSocket *client, const QByteArray &array);
-    qint64 tcpSendVerifySucc(QTcpSocket *client);
 
 public slots:
     /** @brief  用于响应udp接收消息事件 */

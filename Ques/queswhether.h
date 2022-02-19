@@ -13,6 +13,7 @@ public:
 
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
+    void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const override;
 
     QString mQuesText;
     QString mTextLeft, mTextRight;

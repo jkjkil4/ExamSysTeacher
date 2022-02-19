@@ -23,6 +23,13 @@ void QuesWhetherData::readXml(const QDomElement &elem) {
     mState = (DoubleSlideButton::State)elem.attribute("State").toInt();
     mQuesText = elem.text();
 }
+void QuesWhetherData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
+    xml.writeStartElement("QuesWhether");
+    xml.writeAttribute("LTxt", mTextLeft);
+    xml.writeAttribute("RTxt", mTextRight);
+    xml.writeCharacters(mQuesText);
+    xml.writeEndElement();
+}
 
 
 QuesWhether::QuesWhether(QWidget *parent)

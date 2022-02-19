@@ -17,7 +17,7 @@ void QuesChoiceData::writeXml(QXmlStreamWriter &xml) const {
 
     int i = 0;
     // 遍历所有的选项文字，存入XML
-    for(const Choice& choice : choiceList) {
+    for(const Choice &choice : choiceList) {
         xml.writeStartElement("Ans");
         xml.writeAttribute("Checked", QString::number(choice.isChecked));
         xml.writeCharacters(choice.text);
@@ -43,6 +43,17 @@ void QuesChoiceData::readXml(const QDomElement &elem) {
         }
         node = node.nextSibling();
     }
+}
+void QuesChoiceData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
+    xml.writeStartElement(quesName);
+    xml.writeAttribute("Ques", quesText);
+
+    // 遍历所有的选项文字，写入XML
+    for(const Choice &choice : choiceList) {
+        xml.writeTextElement("Ans", choice.text);
+    }
+
+    xml.writeEndElement();
 }
 
 

@@ -29,6 +29,12 @@ public:
      * @param   elem    QDomElement对象，用于读取XML
      */
     virtual void readXml(const QDomElement &elem);
+
+    /**
+     * @brief   使用XML方式对题目内容进行写入，不含答案，用于传给客户端
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    virtual void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const;
 };
 
 /**
