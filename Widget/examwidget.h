@@ -46,19 +46,23 @@ public:
 
     void setIsConnected(const QString &stuName, bool isConnected);
 
-    void udpSendVerifyErr(const QString &what, const QHostAddress &address);
-    void udpSendVerifySucc(const QHostAddress &address);
+    bool parseUdpDatagram(const QByteArray &array);
+    bool parseTcpDatagram(QTcpSocket *client, const QByteArray &array);
+
+    qint64 udpSendVerifyErr(const QString &what, const QHostAddress &address);
+
+    qint64 tcpSendDatagram(QTcpSocket *client, const QByteArray &array);
+    qint64 tcpSendVerifySucc(QTcpSocket *client);
 
 public slots:
     /** @brief  用于响应udp接收消息事件 */
     void onUdpReadyRead();
 
-public:
-    void onUdpReadyRead_SearchServer(const QDomElement &elem);
-
 public slots:
     /** @brief  用于响应tcp连入消息 */
     void onNewConnection();
+    /** @brief  用于接收tcp消息 */
+    void onTcpReadyRead();
 
 private:
     // 界面
@@ -91,5 +95,11 @@ private:
     const Stu* findStu(const QString &name);
 
     // 学生客户端
-    QMap<QTcpSocket*, QString> mMapStuClient;
+    struct Client {
+        Client() = default;
+        Client(const QString &name) : stuName(name) {}
+        QString stuName;
+        QByteArray tcpBuffer;
+    };
+    QMap<QTcpSocket*, Client> mMapStuClient;
 };

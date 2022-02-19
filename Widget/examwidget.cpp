@@ -210,7 +210,48 @@ void ExamWidget::setIsConnected(const QString &stuName, bool isConnected) {\
     }
 }
 
-void ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &address) {
+bool ExamWidget::parseUdpDatagram(const QByteArray &array) {
+    QDomDocument doc;
+    if(!doc.setContent(array))
+        return false;
+    QDomElement root = doc.documentElement();
+    if(root.tagName() != "ESDatagram")
+        return false;
+
+    QString type = root.attribute("Type");
+    if(type == "SearchServer") {
+        QByteArray array;
+        QXmlStreamWriter xml(&array);
+        xml.writeStartDocument();
+        xml.writeStartElement("ESDatagram");
+        xml.writeAttribute("Type", "SearchServerRetval");
+        xml.writeAttribute("Address", mAddress.toString());
+        xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
+        xml.writeCharacters(ui->labelExamName->text());
+        xml.writeEndElement();
+        xml.writeEndDocument();
+        mUdpSocket->writeDatagram(array, QHostAddress(root.text()), 40565);
+    } else return false;
+
+    return true;
+}
+
+bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
+    QDomDocument doc;
+    if(!doc.setContent(array))
+        return false;
+    QDomElement root = doc.documentElement();
+    if(root.tagName() != "ESDatagram")
+        return false;
+
+    QString type = root.attribute("Type");
+    Q_UNUSED(client)
+    Q_UNUSED(type)
+
+    return true;
+}
+
+qint64 ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &address) {
     QByteArray array;
     QXmlStreamWriter xml(&array);
     xml.writeStartDocument();
@@ -219,9 +260,14 @@ void ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &addre
     xml.writeCharacters(what);
     xml.writeEndElement();
     xml.writeEndDocument();
-    mUdpSocket->writeDatagram(array, address, 40565);
+    return mUdpSocket->writeDatagram(array, address, 40565);
 }
-void ExamWidget::udpSendVerifySucc(const QHostAddress &address) {
+
+qint64 ExamWidget::tcpSendDatagram(QTcpSocket *client, const QByteArray &array) {
+    int len = array.length();
+    return client->write(QByteArray((char*)&len, 4) + array);
+}
+qint64 ExamWidget::tcpSendVerifySucc(QTcpSocket *client) {
     QByteArray array;
     QXmlStreamWriter xml(&array);
     xml.writeStartDocument();
@@ -229,7 +275,7 @@ void ExamWidget::udpSendVerifySucc(const QHostAddress &address) {
     xml.writeAttribute("Type", "VerifySucc");
     xml.writeEndElement();
     xml.writeEndDocument();
-    mUdpSocket->writeDatagram(array, address, 40565);
+    return tcpSendDatagram(client, array);
 }
 
 void ExamWidget::onUdpReadyRead() {
@@ -237,31 +283,8 @@ void ExamWidget::onUdpReadyRead() {
     while (mUdpSocket->hasPendingDatagrams()) {
         datagram.resize(int(mUdpSocket->pendingDatagramSize()));
         mUdpSocket->readDatagram(datagram.data(), datagram.size());
-        QDomDocument doc;
-        if(!doc.setContent(datagram))
-            continue;
-        QDomElement root = doc.documentElement();
-        if(root.tagName() != "ESDatagram")
-            continue;
-
-        QString type = root.attribute("Type");
-        if(type == "SearchServer") {
-            onUdpReadyRead_SearchServer(root);
-        }
+        parseUdpDatagram(datagram);
     }
-}
-void ExamWidget::onUdpReadyRead_SearchServer(const QDomElement &elem) {
-    QByteArray array;
-    QXmlStreamWriter xml(&array);
-    xml.writeStartDocument();
-    xml.writeStartElement("ESDatagram");
-    xml.writeAttribute("Type", "SearchServerRetval");
-    xml.writeAttribute("Address", mAddress.toString());
-    xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
-    xml.writeCharacters(ui->labelExamName->text());
-    xml.writeEndElement();
-    xml.writeEndDocument();
-    mUdpSocket->writeDatagram(array, QHostAddress(elem.text()), 40565);
 }
 
 void ExamWidget::onNewConnection() {
@@ -313,15 +336,29 @@ void ExamWidget::onNewConnection() {
             client->disconnectFromHost();
             return;
         }
-        udpSendVerifySucc(client->peerAddress());
+        tcpSendVerifySucc(client);
     }
 
     mMapStuClient[client] = stuName;
     setIsConnected(stuName, true);
+    connect(client, &QTcpSocket::readyRead, this, &ExamWidget::onTcpReadyRead);
     connect(client, &QTcpSocket::disconnected, this, [this, client, stuName] {
         mMapStuClient.remove(client);
         setIsConnected(stuName, false);
     });
+}
+
+void ExamWidget::onTcpReadyRead() {
+    QTcpSocket *client = qobject_cast<QTcpSocket*>(sender());
+    Client &c = mMapStuClient[client];
+    c.tcpBuffer += client->readAll();
+    if(c.tcpBuffer.length() < 4)
+        return;
+    int len = *reinterpret_cast<int*>(c.tcpBuffer.data());
+    while(c.tcpBuffer.length() >= 4 + len) {
+        parseTcpDatagram(client, c.tcpBuffer.mid(4, len));
+        c.tcpBuffer.remove(0, 4 + len);
+    }
 }
 
 const ExamWidget::Stu* ExamWidget::findStu(const QString &name) {
