@@ -46,6 +46,12 @@ public:
 
     void setIsConnected(const QString &stuName, bool isConnected);
 
+    void log(const QString &what);
+    void log(const QTcpSocket *client, const QString &what);
+
+public slots:
+    void onSwitchLogVisible();
+
     bool parseUdpDatagram(const QByteArray &array);
     bool parseTcpDatagram(QTcpSocket *client, const QByteArray &array);
 
@@ -93,12 +99,12 @@ private:
     QList<Stu> mListStu;
     const Stu* findStu(const QString &name);
 
-    // 学生客户端
+    // 考生客户端
     struct Client {
         Client() = default;
         Client(const QString &name) : stuName(name) {}
         QString stuName;
-        QByteArray tcpBuffer;
+        QByteArray buffer;
     };
     QMap<QTcpSocket*, Client> mMapStuClient;
 };

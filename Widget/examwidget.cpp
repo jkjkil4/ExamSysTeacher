@@ -1,6 +1,8 @@
 #include "examwidget.h"
 #include "ui_examwidget.h"
 
+#include <QScrollBar>
+
 #include <QTimer>
 #include <QCryptographicHash>
 
@@ -174,6 +176,9 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         i++;
     }
 
+    ui->listWidgetLog->setVisible(false);
+    connect(ui->btnShowLog, &QPushButton::clicked, this, &ExamWidget::onSwitchLogVisible);
+
     setWindowTitle(mName);
     updateState();
 }
@@ -207,6 +212,35 @@ void ExamWidget::setIsConnected(const QString &stuName, bool isConnected) {\
             ui->tableWidget->item(i, 2)->setText(isConnected ? "已连接" : "未连接");
             break;
         }
+    }
+}
+
+void ExamWidget::log(const QString &what) {
+    QDateTime dateTime = QDateTime::currentDateTime();
+    QString text = '[' + dateTime.toString("yyyy/M/d HH:mm:ss") + ']' + what;
+    // 显示控件
+    ui->listWidgetLog->addItem(text);
+    QScrollBar *scroll = ui->listWidgetLog->verticalScrollBar();
+    if(scroll->maximum() - scroll->value() < 3)
+        ui->listWidgetLog->setCurrentRow(ui->listWidgetLog->count() - 1);
+    // 写入文件
+    QFile file(mDirPath + "/_.log");
+    if(file.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream(&file) << '\n' << text;
+        file.close();
+    }
+}
+void ExamWidget::log(const QTcpSocket *client, const QString &what) {
+    log(QString("[%1:%2]").arg(client->peerAddress().toString()).arg(client->peerPort()) + what);
+}
+
+void ExamWidget::onSwitchLogVisible() {
+    if(ui->listWidgetLog->isVisible()) {
+        ui->btnShowLog->setText("显示日志");
+        ui->listWidgetLog->setVisible(false);
+    } else {
+        ui->btnShowLog->setText("隐藏日志");
+        ui->listWidgetLog->setVisible(true);
     }
 }
 
@@ -261,7 +295,8 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
 
         xml.writeEndElement();
         xml.writeEndDocument();
-        tcpSendDatagram(client, array);
+        qint64 ret = tcpSendDatagram(client, array);
+        log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
     }
 
     return true;
@@ -342,9 +377,11 @@ void ExamWidget::onNewConnection() {
 
         // 如果验证失败，则使client断开并结束函数调用
         if(!verified) {
+            log(client, stuName.isEmpty() ? "连入 验证失败" : "连入 \"" + stuName + "\" 验证失败");
             client->disconnectFromHost();
             return;
         }
+        log(client, stuName.isEmpty() ? "连入 验证成功" : "连入 \"" + stuName + "\" 验证成功");
 
         // 发送验证成功消息
         QByteArray array;
@@ -370,13 +407,13 @@ void ExamWidget::onNewConnection() {
 void ExamWidget::onTcpReadyRead() {
     QTcpSocket *client = qobject_cast<QTcpSocket*>(sender());
     Client &c = mMapStuClient[client];
-    c.tcpBuffer += client->readAll();
-    if(c.tcpBuffer.length() < 4)
+    c.buffer += client->readAll();
+    if(c.buffer.length() < 4)
         return;
-    int len = *reinterpret_cast<int*>(c.tcpBuffer.data());
-    while(c.tcpBuffer.length() >= 4 + len) {
-        parseTcpDatagram(client, c.tcpBuffer.mid(4, len));
-        c.tcpBuffer.remove(0, 4 + len);
+    int len = *reinterpret_cast<int*>(c.buffer.data());
+    while(c.buffer.length() >= 4 + len) {
+        parseTcpDatagram(client, c.buffer.mid(4, len));
+        c.buffer.remove(0, 4 + len);
     }
 }
 
