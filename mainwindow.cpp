@@ -248,7 +248,8 @@ void MainWindow::onAbout() {
                 this, "关于",
                 "ExamSysTeacher v0.1<br>"
                 "作者: jkjkil4<br>"
-                "gitee: <a href=https://gitee.com/jkjkil4/ExamSysTeacher>https://gitee.com/jkjkil4/ExamSysTeacher</a>");
+                "gitee: <a href=https://gitee.com/jkjkil4/ExamSysTeacher>https://gitee.com/jkjkil4/ExamSysTeacher</a><br>"
+                "github: <a href=https://github.com/jkjkil4/ExamSysTeacher>https://github.com/jkjkil4/ExamSysTeacher</a>");
 }
 void MainWindow::onAboutQt() {
     QMessageBox::aboutQt(this);
