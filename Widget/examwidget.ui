@@ -115,8 +115,26 @@
             </item>
             <item>
              <widget class="QLabel" name="labelExamName">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="layoutCurTime" stretch="0,1">
+            <item>
+             <widget class="QLabel" name="labelCurTimeText">
               <property name="text">
-               <string/>
+               <string>当前时间:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelCurTime">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -133,8 +151,8 @@
             </item>
             <item>
              <widget class="QLabel" name="labelStartDateTime">
-              <property name="text">
-               <string/>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -151,8 +169,8 @@
             </item>
             <item>
              <widget class="QLabel" name="labelEndDateTime">
-              <property name="text">
-               <string/>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -169,8 +187,8 @@
             </item>
             <item>
              <widget class="QLabel" name="labelScoreInClient">
-              <property name="text">
-               <string/>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -187,8 +205,8 @@
             </item>
             <item>
              <widget class="QLabel" name="labelState">
-              <property name="text">
-               <string/>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -236,6 +254,22 @@ QPushButton:pressed{
            </widget>
           </item>
           <item>
+           <spacer name="verSpacerBtnsMid">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnStop">
             <property name="minimumSize">
              <size>
@@ -255,7 +289,7 @@ QPushButton:pressed{
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer">
+           <spacer name="verSpacerBtnsBottom">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>

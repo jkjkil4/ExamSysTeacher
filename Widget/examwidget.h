@@ -39,19 +39,18 @@ public:
 
     Error error() { return mError; }
 
-    /**
-     * @brief   根据时间关系更新状态
-     */
-    void updateState();
-
     void setIsConnected(const QString &stuName, bool isConnected);
 
     void log(const QString &what);
     void log(const QTcpSocket *client, const QString &what);
 
 public slots:
+    /** @brief  根据时间关系更新状态 */
+    void updateState();
+    /** @brief  响应切换日志是否可见 */
     void onSwitchLogVisible();
 
+public:
     bool parseUdpDatagram(const QByteArray &array);
     bool parseTcpDatagram(QTcpSocket *client, const QByteArray &array);
 
@@ -76,6 +75,9 @@ private:
     // 网络Socket
     QUdpSocket *mUdpSocket;
     QTcpServer *mTcpServer;
+
+    // 定时器，用于更新时间
+    QTimer *mTimeTimer;
 
     // 目录相关
     QString mDirName, mDirPath;

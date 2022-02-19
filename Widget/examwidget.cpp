@@ -23,6 +23,7 @@
 ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     : QWidget(parent), ui(new Ui::ExamWidget),
       mUdpSocket(new QUdpSocket(this)), mTcpServer(new QTcpServer(this)),
+      mTimeTimer(new QTimer(this)),
       mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName), mHasEnd(hasEnd),
       availableQues({
                     {"QuesSingleChoice", &QuesSingleChoiceData::staticMetaObject},
@@ -176,6 +177,9 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         i++;
     }
 
+    mTimeTimer->start(1000);
+    connect(mTimeTimer, &QTimer::timeout, this, &ExamWidget::updateState);
+
     ui->listWidgetLog->setVisible(false);
     connect(ui->btnShowLog, &QPushButton::clicked, this, &ExamWidget::onSwitchLogVisible);
 
@@ -187,19 +191,6 @@ ExamWidget::~ExamWidget() {
     for(auto iter = mMapStuClient.cbegin(); iter != mMapStuClient.cend(); ++iter) {
         iter.key()->disconnectFromHost();
     }
-}
-
-void ExamWidget::updateState() {
-    QDateTime currentTime = QDateTime::currentDateTime();
-    if(mHasEnd || currentTime > mDateTimeEnd) {
-        ui->labelState->setText("已结束");
-        return;
-    }
-    if(currentTime < mDateTimeStart) {
-        ui->labelState->setText("未开始");
-        return;
-    }
-    ui->labelState->setText("进行中");
 }
 
 void ExamWidget::setIsConnected(const QString &stuName, bool isConnected) {\
@@ -234,6 +225,19 @@ void ExamWidget::log(const QTcpSocket *client, const QString &what) {
     log(QString("[%1:%2]").arg(client->peerAddress().toString()).arg(client->peerPort()) + what);
 }
 
+void ExamWidget::updateState() {
+    QDateTime currentTime = QDateTime::currentDateTime();
+    ui->labelCurTime->setText(currentTime.time().toString("HH:mm:ss"));
+    if(mHasEnd || currentTime > mDateTimeEnd) {
+        ui->labelState->setText("已结束");
+        return;
+    }
+    if(currentTime < mDateTimeStart) {
+        ui->labelState->setText("未开始");
+        return;
+    }
+    ui->labelState->setText("进行中");
+}
 void ExamWidget::onSwitchLogVisible() {
     if(ui->listWidgetLog->isVisible()) {
         ui->btnShowLog->setText("显示日志");
@@ -401,6 +405,7 @@ void ExamWidget::onNewConnection() {
     connect(client, &QTcpSocket::disconnected, this, [this, client, stuName] {
         mMapStuClient.remove(client);
         setIsConnected(stuName, false);
+        log(client, "\"" + stuName + "\" 断开连接");
     });
 }
 
