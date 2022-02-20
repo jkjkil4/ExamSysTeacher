@@ -227,7 +227,7 @@ void ExamWidget::log(const QTcpSocket *client, const QString &what) {
 
 void ExamWidget::updateState() {
     QDateTime currentTime = QDateTime::currentDateTime();
-    ui->labelCurTime->setText(currentTime.time().toString("HH:mm:ss"));
+    ui->labelCurTime->setText(currentTime.toString("yyyy/M/d HH:mm:ss"));
     if(mHasEnd || currentTime > mDateTimeEnd) {
         ui->labelState->setText("已结束");
         return;
@@ -289,6 +289,15 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         xml.writeStartDocument();
         xml.writeStartElement("ESDtg");
         xml.writeAttribute("Type", "ExamData");
+
+        // 写入名称
+        xml.writeAttribute("Name", ui->labelExamName->text());
+
+        // 写入时间
+        const QString dateTimeFmt = "yyyy/M/d H:m:s";
+        xml.writeAttribute("StartDateTime", mDateTimeStart.toString(dateTimeFmt));
+        xml.writeAttribute("EndDateTime", mDateTimeEnd.toString(dateTimeFmt));
+        xml.writeAttribute("CurDateTime", QDateTime::currentDateTime().toString(dateTimeFmt));
 
         // 写入试卷列表
         xml.writeStartElement("QuesList");
