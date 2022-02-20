@@ -41,14 +41,17 @@ public:
 
     void setIsConnected(const QString &stuName, bool isConnected);
 
+    /** @brief  根据时间关系更新状态 */
+    void updateState();
+
     void log(const QString &what);
     void log(const QTcpSocket *client, const QString &what);
 
 public slots:
-    /** @brief  根据时间关系更新状态 */
-    void updateState();
     /** @brief  响应切换日志是否可见 */
     void onSwitchLogVisible();
+    /** @brief  响应定时器事件 */
+    void onTimeTimerTimeout();
 
 public:
     bool parseUdpDatagram(const QByteArray &array);
@@ -86,6 +89,8 @@ private:
     bool mHasEnd;
     Error mError = NormalError;
     QHostAddress mAddress;
+    QHostAddress mMulticastAddress;
+    int mMulticastSecCounter = 0;
 
     // 考试信息
     QString mName;

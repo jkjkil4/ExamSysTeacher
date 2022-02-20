@@ -127,6 +127,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     }
     if(mAddress.isNull())
         mAddress = QHostAddress::LocalHost;
+    mMulticastAddress = QHostAddress("239.255.43.21");
 
     // 配置控件
     ui->labelExamName->setText(mName);
@@ -178,7 +179,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     }
 
     mTimeTimer->start(1000);
-    connect(mTimeTimer, &QTimer::timeout, this, &ExamWidget::updateState);
+    connect(mTimeTimer, &QTimer::timeout, this, &ExamWidget::onTimeTimerTimeout);
 
     ui->listWidgetLog->setVisible(false);
     connect(ui->btnShowLog, &QPushButton::clicked, this, &ExamWidget::onSwitchLogVisible);
@@ -206,6 +207,20 @@ void ExamWidget::setIsConnected(const QString &stuName, bool isConnected) {\
     }
 }
 
+void ExamWidget::updateState() {
+    QDateTime currentTime = QDateTime::currentDateTime();
+    ui->labelCurTime->setText(currentTime.toString("yyyy/M/d HH:mm:ss"));
+    if(mHasEnd || currentTime > mDateTimeEnd) {
+        ui->labelState->setText("已结束");
+        return;
+    }
+    if(currentTime < mDateTimeStart) {
+        ui->labelState->setText("未开始");
+        return;
+    }
+    ui->labelState->setText("进行中");
+}
+
 void ExamWidget::log(const QString &what) {
     QDateTime dateTime = QDateTime::currentDateTime();
     QString text = '[' + dateTime.toString("yyyy/M/d HH:mm:ss") + ']' + what;
@@ -225,19 +240,6 @@ void ExamWidget::log(const QTcpSocket *client, const QString &what) {
     log(QString("[%1:%2]").arg(client->peerAddress().toString()).arg(client->peerPort()) + what);
 }
 
-void ExamWidget::updateState() {
-    QDateTime currentTime = QDateTime::currentDateTime();
-    ui->labelCurTime->setText(currentTime.toString("yyyy/M/d HH:mm:ss"));
-    if(mHasEnd || currentTime > mDateTimeEnd) {
-        ui->labelState->setText("已结束");
-        return;
-    }
-    if(currentTime < mDateTimeStart) {
-        ui->labelState->setText("未开始");
-        return;
-    }
-    ui->labelState->setText("进行中");
-}
 void ExamWidget::onSwitchLogVisible() {
     if(ui->listWidgetLog->isVisible()) {
         ui->btnShowLog->setText("显示日志");
@@ -245,6 +247,25 @@ void ExamWidget::onSwitchLogVisible() {
     } else {
         ui->btnShowLog->setText("隐藏日志");
         ui->listWidgetLog->setVisible(true);
+    }
+}
+
+void ExamWidget::onTimeTimerTimeout() {
+    updateState();
+    ++mMulticastSecCounter;
+    if(mMulticastSecCounter > 10){
+        mMulticastSecCounter = 0;
+        QByteArray array;
+        QXmlStreamWriter xml(&array);
+        xml.writeStartDocument();
+        xml.writeStartElement("ESDtg");
+        xml.writeAttribute("Type", "UpdTime");
+        xml.writeAttribute("Address", mAddress.toString());
+        xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
+        xml.writeCharacters(QDateTime::currentDateTime().toString("yyyy/M/d H:m:s"));
+        xml.writeEndElement();
+        xml.writeEndDocument();
+        mUdpSocket->writeDatagram(array, mMulticastAddress, 40565);
     }
 }
 
@@ -310,7 +331,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         xml.writeEndDocument();
         qint64 ret = tcpSendDatagram(client, array);
         log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
-    }
+    } else return false;
 
     return true;
 }
