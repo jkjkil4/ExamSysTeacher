@@ -190,7 +190,9 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
 
 ExamWidget::~ExamWidget() {
     for(auto iter = mMapStuClient.cbegin(); iter != mMapStuClient.cend(); ++iter) {
+        iter.key()->blockSignals(true);
         iter.key()->disconnectFromHost();
+        iter.key()->blockSignals(false);
     }
 }
 
