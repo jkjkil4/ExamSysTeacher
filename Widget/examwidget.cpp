@@ -196,17 +196,25 @@ ExamWidget::~ExamWidget() {
     }
 }
 
-void ExamWidget::setIsConnected(const QString &stuName, bool isConnected) {\
-    // 遍历每一行
+int ExamWidget::stuRow(const QString &stuName) {
     int rowCount = ui->tableWidget->rowCount();
     for(int i = 0; i < rowCount; ++i) {
-        // 找到考生名字相符的
-        if(ui->tableWidget->item(i, 1)->text() == stuName) {
-            // 设置连接状态文字
-            ui->tableWidget->item(i, 2)->setText(isConnected ? "已连接" : "未连接");
-            break;
-        }
+        if(ui->tableWidget->item(i, 1)->text() == stuName)
+            return i;
     }
+    return -1;
+}
+void ExamWidget::setStuIsConnected(const QString &stuName, bool isConnected) {
+    int row = stuRow(stuName);
+    if(row == -1)
+        return;
+    ui->tableWidget->item(row, 2)->setText(isConnected ? "已连接" : "未连接");
+}
+void ExamWidget::setStuProc(const QString &stuName, int proc) {
+    int row = stuRow(stuName);
+    if(row == -1)
+        return;
+    ui->tableWidget->item(row, 3)->setText(QString::number(proc) + "%");
 }
 
 void ExamWidget::updateState() {
@@ -255,7 +263,7 @@ void ExamWidget::onSwitchLogVisible() {
 void ExamWidget::onTimeTimerTimeout() {
     updateState();
     ++mMulticastSecCounter;
-    if(mMulticastSecCounter > 10){
+    if(mMulticastSecCounter >= 10){
         mMulticastSecCounter = 0;
         QByteArray array;
         QXmlStreamWriter xml(&array);
@@ -333,6 +341,8 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         xml.writeEndDocument();
         qint64 ret = tcpSendDatagram(client, array);
         log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
+    } else if(type == "AnsProc") {
+        setStuProc(mMapStuClient[client].stuName, root.text().toInt());
     } else return false;
 
     return true;
@@ -432,11 +442,11 @@ void ExamWidget::onNewConnection() {
 
     // 设置相关内容
     mMapStuClient[client] = stuName;
-    setIsConnected(stuName, true);
+    setStuIsConnected(stuName, true);
     connect(client, &QTcpSocket::readyRead, this, &ExamWidget::onTcpReadyRead);
     connect(client, &QTcpSocket::disconnected, this, [this, client, stuName] {
         mMapStuClient.remove(client);
-        setIsConnected(stuName, false);
+        setStuIsConnected(stuName, false);
         log(client, "\"" + stuName + "\" 断开连接");
     });
 }
