@@ -115,6 +115,9 @@
             </item>
             <item>
              <widget class="QLabel" name="labelExamName">
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
@@ -133,6 +136,9 @@
             </item>
             <item>
              <widget class="QLabel" name="labelCurTime">
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
@@ -151,6 +157,9 @@
             </item>
             <item>
              <widget class="QLabel" name="labelStartDateTime">
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
@@ -169,6 +178,9 @@
             </item>
             <item>
              <widget class="QLabel" name="labelEndDateTime">
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
@@ -187,6 +199,9 @@
             </item>
             <item>
              <widget class="QLabel" name="labelScoreInClient">
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
@@ -205,6 +220,9 @@
             </item>
             <item>
              <widget class="QLabel" name="labelState">
+              <property name="textFormat">
+               <enum>Qt::PlainText</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>

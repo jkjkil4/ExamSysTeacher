@@ -53,6 +53,9 @@
          <property name="text">
           <string>Name</string>
          </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
         </widget>
        </item>
        <item>
