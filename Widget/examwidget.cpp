@@ -196,6 +196,15 @@ ExamWidget::~ExamWidget() {
     }
 }
 
+int ExamWidget::stuInd(const QString &stuName) {
+    int i = 0;
+    for(const Stu &stu : mListStu) {
+        if(stu.name == stuName)
+            return i;
+        ++i;
+    }
+    return -1;
+}
 int ExamWidget::stuRow(const QString &stuName) {
     int rowCount = ui->tableWidget->rowCount();
     for(int i = 0; i < rowCount; ++i) {
@@ -215,6 +224,12 @@ void ExamWidget::setStuProc(const QString &stuName, int proc) {
     if(row == -1)
         return;
     ui->tableWidget->item(row, 3)->setText(QString::number(proc) + "%");
+}
+void ExamWidget::setStuUploadTime(const QString &stuName, const QDateTime &dt) {
+    int row = stuRow(stuName);
+    if(row == -1)
+        return;
+    ui->tableWidget->item(row, 4)->setText(dt.toString("HH:mm:ss"));
 }
 
 void ExamWidget::updateState() {
@@ -343,6 +358,26 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
     } else if(type == "AnsProc") {
         setStuProc(mMapStuClient[client].stuName, root.text().toInt());
+    } else if(type == "StuAns") {
+        QString stuName = mMapStuClient[client].stuName;
+        int ind = stuInd(stuName);
+        QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
+        if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            file.write(array);
+            file.close();
+            setStuUploadTime(stuName, QDateTime::fromString(root.attribute("Time"), "yyyy/M/d H:m:s"));
+            log(client, "\"" + stuName + "\" 上传作答");
+
+            QByteArray array;
+            QXmlStreamWriter xml(&array);
+            xml.writeStartDocument();
+            xml.writeStartElement("ESDtg");
+            xml.writeAttribute("Type", "StuAnsReceived");
+            xml.writeCharacters(root.attribute("Time"));
+            xml.writeEndElement();
+            xml.writeEndDocument();
+            tcpSendDatagram(client, array);
+        }
     } else return false;
 
     return true;

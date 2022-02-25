@@ -39,9 +39,11 @@ public:
 
     Error error() { return mError; }
 
+    int stuInd(const QString &stuName);
     int stuRow(const QString &stuName);
     void setStuIsConnected(const QString &stuName, bool isConnected);
     void setStuProc(const QString &stuName, int proc);
+    void setStuUploadTime(const QString &stuName, const QDateTime &dt);
 
     /** @brief  根据时间关系更新状态 */
     void updateState();
