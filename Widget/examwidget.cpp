@@ -369,7 +369,8 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         xml.writeStartElement("ESDtg");
         xml.writeAttribute("Type", "ExamData");
 
-        // 写入名称
+        // 写入信息
+        xml.writeAttribute("ID", mDirName);
         xml.writeAttribute("Name", ui->labelExamName->text());
 
         // 写入时间
@@ -380,10 +381,22 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
 
         // 写入试卷列表
         xml.writeStartElement("QuesList");
+        int i = 0;
         for(const QuesData *ques : mListQues) {
-            ques->writeXmlWithoutTrueAns(xml);
+            ques->writeXmlWithoutTrueAns(xml, i);
+            ++i;
         }
         xml.writeEndElement();
+
+        // 写入考生作答（直接传回之前上传的内容）
+        if(root.attribute("StuAnsRequest").toInt()) {
+            QString stuName = mMapStuClient[client].stuName;
+            QFile file(mDirPath + "/" + QString::number(stuInd(stuName)) + ".stuans");
+            if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                xml.writeTextElement("StuAns", file.readAll());
+                file.close();
+            }
+        }
 
         xml.writeEndElement();
         xml.writeEndDocument();

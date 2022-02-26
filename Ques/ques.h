@@ -33,8 +33,9 @@ public:
     /**
      * @brief   使用XML方式对题目内容进行写入，不含答案，用于传给客户端
      * @param   xml     QXmlStreamWriter对象，用于写入XML
+     * @param   ind     题目的索引
      */
-    virtual void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const;
+    virtual void writeXmlWithoutTrueAns(QXmlStreamWriter &xml, int ind) const;
 };
 
 /**
