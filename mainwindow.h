@@ -39,6 +39,8 @@ public:
      */
     bool saveProj(const QString &filePath);
 
+    bool displayExam(const QString &dirName);
+
     bool verifyClose();
 
 public slots:
@@ -48,6 +50,9 @@ public slots:
     void onLoadProj();
     /** @brief  用于响应保存试卷的信号 */
     void onSaveProj();
+
+    /** @brief  用于响应显示历次考试的信号 */
+    void onDisplayExamHistory();
 
     /** @brief  用于响应发放试卷信号（进入PushView） */
     void onPush();

@@ -68,6 +68,7 @@ void PushView::setProjName(const QString &projName) {
 void PushView::writeAttributesXml(QXmlStreamWriter &xml) {
     const QString dateTimeFmt = "yyyy/M/d H:m:s";
     xml.writeAttribute("Name", ui->labelProjName->text());
+    xml.writeAttribute("CreateDateTime", QDateTime::currentDateTime().toString(dateTimeFmt));
     xml.writeAttribute("StartDateTime", ui->dateTimeEditStart->dateTime().toString(dateTimeFmt));
     xml.writeAttribute("EndDateTime", ui->dateTimeEditEnd->dateTime().toString(dateTimeFmt));
     xml.writeAttribute("ScoreInClient", QString::number(ui->cbbScoreInClient->isChecked()));
@@ -172,6 +173,7 @@ void PushView::onPush() {
     QXmlStreamWriter xml(&fileExported);
     xml.setAutoFormatting(true);
     xml.writeStartDocument();
+    xml.writeComment("警告: 该文件由 ExamSysTeacher 自动生成，如果你不了解请勿修改该文件");
     xml.writeStartElement("ExamSysExportedProject");
     writeAttributesXml(xml);
     writeStuListXml(xml);

@@ -21,6 +21,7 @@
 #include "SubWidget/editview.h"
 #include "SubWidget/pushview.h"
 #include "Widget/examwidget.h"
+#include "Widget/examhistory.h"
 #include "Util/config.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -45,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actNewProj, &QAction::triggered, this, &MainWindow::onNewProj);
     connect(ui->actLoadProj, &QAction::triggered, this, &MainWindow::onLoadProj);
     connect(ui->actSaveProj, &QAction::triggered, this, &MainWindow::onSaveProj);
+    connect(ui->actExamHistory, &QAction::triggered, this, &MainWindow::onDisplayExamHistory);
     connect(ui->actAbout, &QAction::triggered, this, &MainWindow::onAbout);
     connect(ui->actAboutQt, &QAction::triggered, this, &MainWindow::onAboutQt);
 
@@ -140,6 +142,24 @@ bool MainWindow::saveProj(const QString &filePath) {
     return true;
 }
 
+bool MainWindow::displayExam(const QString &dirName) {
+    ExamWidget *widget = new ExamWidget(dirName);
+    if(widget->error() != ExamWidget::NoError) {
+        QString what;
+        if(widget->error() & ExamWidget::NetworkError) {
+            what = QString("网络错误 %1\n请检查防火墙等设置").arg(QMetaEnum::fromType<ExamWidget::Error>().valueToKey(widget->error()));
+        } else if(widget->error() == ExamWidget::FileLockError) {
+            what = "文件正在使用";
+        } else what = "操作失败";
+        QMessageBox::critical(this, "错误", what);
+        delete widget;
+        return false;
+    }
+    widget->setAttribute(Qt::WA_DeleteOnClose);
+    widget->show();
+    return true;
+}
+
 bool MainWindow::verifyClose() {
     int ret = QMessageBox::information(this, "提示", "文件未保存", "保存", "不保存", "取消");
     switch(ret) {
@@ -207,6 +227,12 @@ void MainWindow::onSaveProj() {
         mIsChanged = false;
 }
 
+void MainWindow::onDisplayExamHistory() {
+    ExamHistory dialog(this);
+    if(dialog.exec())
+        displayExam(dialog.examDirName());
+}
+
 void MainWindow::onPush() {
     if(!saveProj(mProjPath))
         return;
@@ -225,18 +251,8 @@ void MainWindow::onPushViewBack() {
     mStkLayout->setCurrentWidget(mEditView);
 }
 void MainWindow::onExam(const QString &dirName) {
-    ExamWidget *widget = new ExamWidget(dirName);
-    if(widget->error() != ExamWidget::NoError) {
-        QMessageBox::critical(
-                    this, "错误",
-                    widget->error() & ExamWidget::NetworkError
-                    ? QString("网络错误 %1\n请检查防火墙等设置").arg(QMetaEnum::fromType<ExamWidget::Error>().valueToKey(widget->error()))
-                    : "操作失败");
-        delete widget;
+    if(!displayExam(dirName))
         return;
-    }
-    widget->setAttribute(Qt::WA_DeleteOnClose);
-    widget->show();
     ui->actNewProj->setEnabled(true);
     ui->actLoadProj->setEnabled(true);
     ui->actSaveProj->setEnabled(true);

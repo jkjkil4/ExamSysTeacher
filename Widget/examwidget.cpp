@@ -2,12 +2,15 @@
 #include "ui_examwidget.h"
 
 #include <QScrollBar>
+#include <QMessageBox>
+#include <QCloseEvent>
 
 #include <QTimer>
 #include <QCryptographicHash>
 
 #include <QDomDocument>
 #include <QXmlStreamWriter>
+#include <QXmlStreamReader>
 #include <QTextStream>
 
 #include <QUdpSocket>
@@ -24,7 +27,9 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     : QWidget(parent), ui(new Ui::ExamWidget),
       mUdpSocket(new QUdpSocket(this)), mTcpServer(new QTcpServer(this)),
       mTimeTimer(new QTimer(this)),
-      mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName), mHasEnd(hasEnd),
+      mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName),
+      mLockFile(mDirPath + "/_.lock"), mConfigFile(mDirPath + "/_.ini", QSettings::IniFormat),
+      mHasEnd(hasEnd),
       availableQues({
                     {"QuesSingleChoice", &QuesSingleChoiceData::staticMetaObject},
                     {"QuesMultiChoice", &QuesMultiChoiceData::staticMetaObject},
@@ -32,6 +37,11 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
                     })
 {
     ui->setupUi(this);
+
+    if(!mLockFile.tryLock()) {
+        mError = FileLockError;
+        return;
+    }
 
     QFile fileExported(mDirPath + "/_.esep");
     if(fileExported.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -98,6 +108,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
 
             mError = NoError;
         } while(false);
+        fileExported.close();
     }
 
     if(mError != NoError)
@@ -163,7 +174,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         itemConnection->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
         ui->tableWidget->setItem(i, 2, itemConnection);
 
-        QTableWidgetItem *itemProgress = new QTableWidgetItem("0%");
+        QTableWidgetItem *itemProgress = new QTableWidgetItem;  //("0%");
         itemProgress->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
         ui->tableWidget->setItem(i, 3, itemProgress);
 
@@ -174,6 +185,25 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         QTableWidgetItem *itemScore = new QTableWidgetItem("暂无");
         itemScore->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
         ui->tableWidget->setItem(i, 5, itemScore);
+
+        // 读取考生进度
+        itemProgress->setText(mConfigFile.value(QString("Stu/%1_Proc").arg(i), "0").toString() + "%");
+
+        // 读取考生最后一次提交时间
+        QFile file(mDirPath + "/" + QString::number(i) + ".stuans");
+        do {
+            if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                break;
+            QXmlStreamReader xml(&file);
+            if(!xml.readNextStartElement())
+                break;
+            QDateTime dt = QDateTime::fromString(xml.attributes().value("Time").toString(), "yyyy/M/d H:m:s");
+            if(!dt.isValid())
+                break;
+            itemLastUpload->setText(dt.toString("HH:mm:ss"));
+        } while(false);
+        if(file.isOpen())
+            file.close();
 
         i++;
     }
@@ -194,6 +224,9 @@ ExamWidget::~ExamWidget() {
         iter.key()->disconnectFromHost();
         iter.key()->blockSignals(false);
     }
+
+    if(mLockFile.isLocked())
+        mLockFile.unlock();
 }
 
 int ExamWidget::stuInd(const QString &stuName) {
@@ -357,7 +390,10 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         qint64 ret = tcpSendDatagram(client, array);
         log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
     } else if(type == "AnsProc") {
-        setStuProc(mMapStuClient[client].stuName, root.text().toInt());
+        QString strProc = root.text();
+        const QString &stuName = mMapStuClient[client].stuName;
+        mConfigFile.setValue(QString("Stu/%1_Proc").arg(stuInd(stuName)), strProc);
+        setStuProc(stuName, strProc.toInt());
     } else if(type == "StuAns") {
         QString stuName = mMapStuClient[client].stuName;
         int ind = stuInd(stuName);
@@ -366,7 +402,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
             file.write(array);
             file.close();
             setStuUploadTime(stuName, QDateTime::fromString(root.attribute("Time"), "yyyy/M/d H:m:s"));
-            log(client, "\"" + stuName + "\" 上传作答");
+            log(client, "\"" + stuName + "\" 上传作答 成功");
 
             QByteArray array;
             QXmlStreamWriter xml(&array);
@@ -377,7 +413,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
             xml.writeEndElement();
             xml.writeEndDocument();
             tcpSendDatagram(client, array);
-        }
+        } else log(client, "\"" + stuName + "\" 上传作答 失败");
     } else return false;
 
     return true;
@@ -496,6 +532,17 @@ void ExamWidget::onTcpReadyRead() {
     while(c.buffer.length() >= 4 + len) {
         parseTcpDatagram(client, c.buffer.mid(4, len));
         c.buffer.remove(0, 4 + len);
+    }
+}
+
+void ExamWidget::closeEvent(QCloseEvent *ev) {
+    int ret = QMessageBox::information(this, "提示",
+                                       "确认要关闭吗?\n"
+                                       "将会断开考试有关连接\n"
+                                       "你可以在菜单栏的 考试->历次考试 中再次打开该考试",
+                                       "确认", "取消");
+    if(ret == 1) {
+        ev->ignore();
     }
 }
 

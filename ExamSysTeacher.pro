@@ -37,6 +37,8 @@ SOURCES += \
         SubWidget/pushview.cpp \
         Util/config.cpp \
         Widget/doubleslidebutton.cpp \
+        Widget/examhistory.cpp \
+        Widget/examhistoryitemwidget.cpp \
         Widget/examwidget.cpp \
         main.cpp \
         mainwindow.cpp
@@ -53,6 +55,8 @@ HEADERS += \
         Util/config.h \
         Util/header.h \
         Widget/doubleslidebutton.h \
+        Widget/examhistory.h \
+        Widget/examhistoryitemwidget.h \
         Widget/examwidget.h \
         mainwindow.h
 
@@ -68,6 +72,7 @@ FORMS += \
     SubWidget/editview.ui \
     SubWidget/mainview.ui \
     SubWidget/pushview.ui \
+    Widget/examhistory.ui \
     Widget/examwidget.ui \
     mainwindow.ui
 

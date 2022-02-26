@@ -6,6 +6,8 @@
 #include <QDateTime>
 #include <QMap>
 #include <QHostAddress>
+#include <QLockFile>
+#include <QSettings>
 
 namespace Ui {
 class ExamWidget;
@@ -30,7 +32,8 @@ public:
         NormalError = 0x01,
         UdpBindError = 0x02,
         TcpListenError = 0x04,
-        NetworkError = UdpBindError | TcpListenError
+        NetworkError = UdpBindError | TcpListenError,
+        FileLockError = 0x08
     };
     Q_ENUM(Error)
 
@@ -75,6 +78,9 @@ public slots:
     /** @brief  用于接收tcp消息 */
     void onTcpReadyRead();
 
+protected:
+    void closeEvent(QCloseEvent *ev) override;
+
 private:
     // 界面
     Ui::ExamWidget *ui;
@@ -88,6 +94,8 @@ private:
 
     // 目录相关
     QString mDirName, mDirPath;
+    QLockFile mLockFile;
+    QSettings mConfigFile;
 
     // 基本属性
     bool mHasEnd;

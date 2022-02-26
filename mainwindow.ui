@@ -44,7 +44,14 @@
     <addaction name="actAbout"/>
     <addaction name="actAboutQt"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>考试</string>
+    </property>
+    <addaction name="actExamHistory"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_3"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
@@ -86,6 +93,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actExamHistory">
+   <property name="text">
+    <string>历次考试</string>
    </property>
   </action>
  </widget>
