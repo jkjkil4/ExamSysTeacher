@@ -38,7 +38,7 @@ ExamHistory::ExamHistory(QWidget *parent)
 
     std::sort(mExamList.begin(), mExamList.end(), [](const Exam &a, const Exam &b) -> bool {
         if(a.isEnd != b.isEnd)
-            return a.isEnd;
+            return b.isEnd;
         return a.dtCreate > b.dtCreate;
     });
 

@@ -345,6 +345,7 @@ bool ExamWidget::parseUdpDatagram(const QByteArray &array) {
         xml.writeAttribute("Type", "SearchServerRetval");
         xml.writeAttribute("Address", mAddress.toString());
         xml.writeAttribute("Port", QString::number(mTcpServer->serverPort()));
+        xml.writeAttribute("ID", mDirName);
         xml.writeCharacters(ui->labelExamName->text());
         xml.writeEndElement();
         xml.writeEndDocument();
@@ -384,7 +385,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         xml.writeStartElement("QuesList");
         int i = 0;
         for(const QuesData *ques : mListQues) {
-            ques->writeXmlWithoutTrueAns(xml, i);
+            ques->writeXmlWithoutTrueAns(xml);
             ++i;
         }
         xml.writeEndElement();

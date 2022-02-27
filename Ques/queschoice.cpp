@@ -44,9 +44,8 @@ void QuesChoiceData::readXml(const QDomElement &elem) {
         node = node.nextSibling();
     }
 }
-void QuesChoiceData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml, int ind) const {
+void QuesChoiceData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
     xml.writeStartElement(quesName);
-    xml.writeAttribute("Ind", QString::number(ind));
     xml.writeAttribute("Ques", quesText);
 
     // 遍历所有的选项文字，写入XML

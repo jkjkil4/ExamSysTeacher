@@ -35,7 +35,7 @@ public:
      * @param   xml     QXmlStreamWriter对象，用于写入XML
      * @param   ind     题目的索引
      */
-    virtual void writeXmlWithoutTrueAns(QXmlStreamWriter &xml, int ind) const;
+    virtual void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const;
 };
 
 /**

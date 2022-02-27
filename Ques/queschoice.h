@@ -15,7 +15,7 @@ public:
 
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
-    void writeXmlWithoutTrueAns(QXmlStreamWriter &xml, int ind) const override;
+    void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const override;
 
     QString quesName;
     QString quesText;

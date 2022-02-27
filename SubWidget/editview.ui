@@ -269,6 +269,16 @@ QSplitter#splitter::margin{
          <widget class="QWidget" name="widgetConf2" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
+            <widget class="QLabel" name="labelConfUnfinished">
+             <property name="text">
+              <string>暂未实现</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="verSpacerConf">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
