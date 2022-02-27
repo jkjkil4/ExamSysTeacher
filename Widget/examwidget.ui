@@ -230,6 +230,27 @@
             </item>
            </layout>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="layoutNetwork" stretch="0,1">
+            <item>
+             <widget class="QLabel" name="labelNetworkText">
+              <property name="text">
+               <string>网络:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelNetwork">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -266,29 +287,6 @@ QPushButton:pressed{
           </property>
           <item>
            <widget class="QPushButton" name="btnShowLog">
-            <property name="text">
-             <string>显示日志</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verSpacerBtnsMid">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>10</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnStop">
             <property name="minimumSize">
              <size>
               <width>350</width>
@@ -302,7 +300,7 @@ QPushButton:pressed{
              </size>
             </property>
             <property name="text">
-             <string>中止考试</string>
+             <string>显示日志</string>
             </property>
            </widget>
           </item>

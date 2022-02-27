@@ -145,6 +145,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     ui->labelStartDateTime->setText(mDateTimeStart.toString("yyyy/M/d HH:mm:ss"));
     ui->labelEndDateTime->setText(mDateTimeEnd.toString("yyyy/M/d HH:mm:ss"));
     ui->labelScoreInClient->setText(mScoreInClient ? "是" : "否");
+    ui->labelNetwork->setText(mAddress.toString() + ":" + QString::number(mTcpServer->serverPort()));
 
     // 初始化表头
     const QStringList horHeaderText = {
@@ -535,16 +536,36 @@ void ExamWidget::onNewConnection() {
     });
 }
 
+//#define DEBUG_TCP
+
 void ExamWidget::onTcpReadyRead() {
     QTcpSocket *client = qobject_cast<QTcpSocket*>(sender());
     Client &c = mMapStuClient[client];
     c.buffer += client->readAll();
+
+#ifdef DEBUG_TCP
+    qDebug().noquote() << "Buffer: " << c.buffer.size();
+#endif
+
     if(c.buffer.length() < 4)
         return;
     int len = *reinterpret_cast<int*>(c.buffer.data());
+
+#ifdef DEBUG_TCP
+    qDebug().noquote() << "Len: " << len;
+#endif
+
     while(c.buffer.length() >= 4 + len) {
+#ifdef DEBUG_TCP
+        qDebug().noquote() << "Parsed: " << len;
+#endif
+
         parseTcpDatagram(client, c.buffer.mid(4, len));
         c.buffer.remove(0, 4 + len);
+
+        if(c.buffer.length() < 4)
+            break;
+        len = *reinterpret_cast<int*>(c.buffer.data());
     }
 }
 
