@@ -16,8 +16,8 @@ public:
     void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const override;
 
     QString mQuesText;
-    QString mTextLeft, mTextRight;
-    DoubleSlideButton::State mState;
+    QString mTextLeft = "错", mTextRight = "对";
+    DoubleSlideButton::State mState = DoubleSlideButton::Mid;
 };
 
 /**
