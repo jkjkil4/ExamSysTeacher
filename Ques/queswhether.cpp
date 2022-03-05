@@ -30,6 +30,12 @@ void QuesWhetherData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
     xml.writeCharacters(mQuesText);
     xml.writeEndElement();
 }
+void QuesWhetherData::writeXmlTrueAns(QXmlStreamWriter &xml) const {
+    xml.writeTextElement("v", QString::number(mState));
+}
+bool QuesWhetherData::isRight(const QString &str) const {
+    return str.toInt() == mState;
+}
 
 
 QuesWhether::QuesWhether(QWidget *parent)

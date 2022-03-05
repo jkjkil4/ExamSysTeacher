@@ -47,6 +47,7 @@ public:
     void setStuIsConnected(const QString &stuName, bool isConnected);
     void setStuProc(const QString &stuName, int proc);
     void setStuUploadTime(const QString &stuName, const QDateTime &dt);
+    void setStuScore(const QString &stuName, int right);
 
     /** @brief  根据时间关系更新状态 */
     void updateState();

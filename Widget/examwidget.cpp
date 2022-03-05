@@ -189,6 +189,10 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
 
         // 读取考生进度
         itemProgress->setText(mConfigFile.value(QString("Stu/%1_Proc").arg(i), "0").toString() + "%");
+        // 读取考生成绩
+        QString stuScoreKey = QString("Stu/%1_Score").arg(i);
+        if(mConfigFile.contains(stuScoreKey))
+            itemScore->setText(mConfigFile.value(stuScoreKey).toString() + "/" + QString::number(mListQues.size()));
 
         // 读取考生最后一次提交时间
         QFile file(mDirPath + "/" + QString::number(i) + ".stuans");
@@ -264,6 +268,12 @@ void ExamWidget::setStuUploadTime(const QString &stuName, const QDateTime &dt) {
     if(row == -1)
         return;
     ui->tableWidget->item(row, 4)->setText(dt.toString("HH:mm:ss"));
+}
+void ExamWidget::setStuScore(const QString &stuName, int right) {
+    int row = stuRow(stuName);
+    if(row == -1)
+        return;
+    ui->tableWidget->item(row, 5)->setText(QString::number(right) + "/" + QString::number(mListQues.size()));
 }
 
 void ExamWidget::updateState() {
@@ -364,6 +374,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         return false;
 
     QString type = root.attribute("Type");
+    QString stuName = mMapStuClient[client].stuName;
     if(type == "ExamDataRequest") {
         QByteArray array;
         QXmlStreamWriter xml(&array);
@@ -392,7 +403,6 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
 
         // 写入考生作答（直接传回之前上传的内容）
         if(root.attribute("StuAnsRequest").toInt()) {
-            QString stuName = mMapStuClient[client].stuName;
             QFile file(mDirPath + "/" + QString::number(stuInd(stuName)) + ".stuans");
             if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 xml.writeTextElement("StuAns", file.readAll());
@@ -406,11 +416,9 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
     } else if(type == "AnsProc") {
         QString strProc = root.text();
-        const QString &stuName = mMapStuClient[client].stuName;
         mConfigFile.setValue(QString("Stu/%1_Proc").arg(stuInd(stuName)), strProc);
         setStuProc(stuName, strProc.toInt());
     } else if(type == "StuAns") {
-        QString stuName = mMapStuClient[client].stuName;
         int ind = stuInd(stuName);
         QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
         if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -429,6 +437,46 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
             xml.writeEndDocument();
             tcpSendDatagram(client, array);
         } else log(client, "\"" + stuName + "\" 上传作答 失败");
+    } else if(type == "StuFinish") {
+        int ind = stuInd(stuName);
+        QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QDomDocument docAns;
+            if(docAns.setContent(&file)) {
+                int quesCnt = mListQues.size(), quesRight = 0;
+                QDomNode node = docAns.documentElement().firstChild();
+                int i = 0;
+                while(!node.isNull() && i < quesCnt) {
+                    QDomElement elem = node.toElement();
+                    if(!elem.isNull()) {
+                        if(mListQues[i]->isRight(elem.text()))
+                            ++quesRight;
+                        ++i;
+                    }
+                    node = node.nextSibling();
+                }
+                setStuScore(stuName, quesRight);
+                mConfigFile.setValue(QString("Stu/%1_Score").arg(ind), QString::number(quesRight));
+
+                log(client, "\"" + stuName + "\" 交卷 成功");
+
+                QByteArray array;
+                QXmlStreamWriter xml(&array);
+                xml.writeStartDocument();
+                xml.writeStartElement("ESDtg");
+                xml.writeAttribute("Type", "StuFinishRetval");
+                if(mScoreInClient) {
+                    xml.writeStartElement("TrueAnsList");
+                    for(const QuesData *ques : mListQues) {
+                        ques->writeXmlTrueAns(xml);
+                    }
+                    xml.writeEndElement();
+                }
+                xml.writeEndElement();
+                xml.writeEndDocument();
+                tcpSendDatagram(client, array);
+            } else log(client, "\"" + stuName + "\" 交卷 失败（文件无效）");
+        } else log(client, "\"" + stuName + "\" 交卷 失败（文件无法访问）");
     } else return false;
 
     return true;

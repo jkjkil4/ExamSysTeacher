@@ -13,9 +13,13 @@ public:
 
     Q_INVOKABLE explicit QuesChoiceData(const QString &quesName, QObject *parent = nullptr);
 
+    QString ansStr() const;
+
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
     void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const override;
+    void writeXmlTrueAns(QXmlStreamWriter &xml) const override;
+    bool isRight(const QString &str) const override;
 
     QString quesName;
     QString quesText;

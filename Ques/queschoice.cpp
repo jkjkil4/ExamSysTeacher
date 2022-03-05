@@ -11,6 +11,17 @@
 
 QuesChoiceData::QuesChoiceData(const QString &quesName, QObject *parent)
     : QuesData(parent), quesName(quesName) {}
+QString QuesChoiceData::ansStr() const {
+    QString str;
+    // 遍历 choiceList 将选中的索引写入到 str 中
+    int i = 0;
+    for(const Choice &choice : choiceList) {
+        if(choice.isChecked)
+            str += QString::number(i) + ';';
+        ++i;
+    }
+    return str;
+}
 void QuesChoiceData::writeXml(QXmlStreamWriter &xml) const {
     xml.writeStartElement(quesName);
     xml.writeAttribute("Ques", quesText);
@@ -54,6 +65,12 @@ void QuesChoiceData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
     }
 
     xml.writeEndElement();
+}
+void QuesChoiceData::writeXmlTrueAns(QXmlStreamWriter &xml) const {
+    xml.writeTextElement("v", ansStr());
+}
+bool QuesChoiceData::isRight(const QString &str) const {
+    return str == ansStr();
 }
 
 

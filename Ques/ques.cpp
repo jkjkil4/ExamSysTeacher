@@ -9,6 +9,8 @@ QuesData::QuesData(QObject *parent) : QObject(parent) {}
 void QuesData::writeXml(QXmlStreamWriter &) const {}
 void QuesData::readXml(const QDomElement &) {}
 void QuesData::writeXmlWithoutTrueAns(QXmlStreamWriter &) const {}
+void QuesData::writeXmlTrueAns(QXmlStreamWriter &) const {}
+bool QuesData::isRight(const QString &) const { return false; }
 
 Ques::Ques(QWidget *parent)
     : QWidget(parent),

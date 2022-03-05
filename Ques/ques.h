@@ -33,9 +33,21 @@ public:
     /**
      * @brief   使用XML方式对题目内容进行写入，不含答案，用于传给客户端
      * @param   xml     QXmlStreamWriter对象，用于写入XML
-     * @param   ind     题目的索引
      */
     virtual void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const;
+    
+    /**
+     * @brief   使用XML方式对题目正确答案进行写入，用于传给客户端
+     * @param   xml     QXmlStreamWriter对象，用于写入XML
+     */
+    virtual void writeXmlTrueAns(QXmlStreamWriter &xml) const;
+
+    /**
+     * @brief   判断作答是否正确
+     * @param   str     用于判断的字符串
+     * @return  是否正确
+     */
+    virtual bool isRight(const QString &str) const;
 };
 
 /**
