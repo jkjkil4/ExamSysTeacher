@@ -164,7 +164,7 @@ void QuesChoice::readXml(const QDomElement &elem) {
 QString QuesChoice::numToLetter(int num) {
     QString res;
     do {
-        res += 'A' + num % 26;
+        res += (char)('A' + num % 26);
         num /= 26;
     } while(num);
     return res;

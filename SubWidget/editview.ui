@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1155</width>
-    <height>665</height>
+    <width>1050</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,8 +131,8 @@ QSplitter#splitter::margin{
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>500</width>
-              <height>640</height>
+              <width>453</width>
+              <height>625</height>
              </rect>
             </property>
            </widget>

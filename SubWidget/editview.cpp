@@ -259,7 +259,7 @@ void EditView::onPushClicked() {
     area->setWidget(areaWidget);
 
     QHBoxLayout *layoutDialog = new QHBoxLayout;
-    layoutDialog->setMargin(0);
+    layoutDialog->setContentsMargins(QMargins());
     layoutDialog->addWidget(area);
 
     QDialog dialog(this);

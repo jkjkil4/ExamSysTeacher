@@ -1,6 +1,7 @@
 #include "doubleslidebutton.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QtMath>
 
 DoubleSlideButton::DoubleSlideButton()

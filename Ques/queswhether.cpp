@@ -56,7 +56,7 @@ QuesWhether::QuesWhether(QWidget *parent)
     mLayout->addLayout(mLayoutButton);
     mFrame->setLayout(mLayout);
 
-    connect(mButton, SIGNAL(stateChanged()), this, SIGNAL(changed()));
+    connect(mButton, &DoubleSlideButton::stateChanged, this, &QuesWhether::onStateChanged);
 }
 
 bool QuesWhether::edit() {
@@ -100,5 +100,10 @@ void QuesWhether::updateWidgetsByData() {
     mLabelBtnLeft->setText(mData.mTextLeft);
     mLabelBtnRight->setText(mData.mTextRight);
     mButton->setState((DoubleSlideButton::State)mData.mState);
+}
+
+void QuesWhether::onStateChanged() {
+    mData.mState = mButton->state();
+    emit changed();
 }
 

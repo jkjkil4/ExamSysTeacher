@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     mPushView->autoAdjustDateTime();
 
-    mStkLayout->setMargin(0);
+    mStkLayout->setContentsMargins(QMargins());
     mStkLayout->addWidget(mMainView);
     mStkLayout->addWidget(mEditView);
     mStkLayout->addWidget(mPushView);

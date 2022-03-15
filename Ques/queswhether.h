@@ -38,6 +38,9 @@ public:
 
     void updateWidgetsByData();
 
+public slots:
+    void onStateChanged();
+
 private:
     QLabel *mLabelQues;
     QLabel *mLabelBtnLeft, *mLabelBtnRight;
