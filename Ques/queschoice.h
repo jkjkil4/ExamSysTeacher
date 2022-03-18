@@ -11,7 +11,7 @@ class QuesChoiceData : public QuesData
 public:
     struct Choice { bool isChecked; QString text; };
 
-    Q_INVOKABLE explicit QuesChoiceData(const QString &quesName, QObject *parent = nullptr);
+    Q_INVOKABLE explicit QuesChoiceData(const QString &quesName, const QString &head, QObject *parent = nullptr);
 
     QString ansStr() const;
 
@@ -19,9 +19,10 @@ public:
     void readXml(const QDomElement &elem) override;
     void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const override;
     void writeXmlTrueAns(QXmlStreamWriter &xml) const override;
-    bool isRight(const QString &str) const override;
+    Score score(const QString &str) const override;
 
     QString quesName;
+    QString head;
     QString quesText;
     QList<Choice> choiceList;
 };
@@ -39,13 +40,6 @@ public:
 
     void writeXml(QXmlStreamWriter &xml) const override;
     void readXml(const QDomElement &elem) override;
-
-    /**
-     * @brief   通过数字序号得到对应的字母序号
-     * @param   数字序号
-     * @return  字母序号
-     */
-    QString numToLetter(int num);
 
     void updateWidgetsByData();
 

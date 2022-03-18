@@ -9,8 +9,17 @@
 #include <QXmlStreamWriter>
 #include <QDomDocument>
 
-QuesChoiceData::QuesChoiceData(const QString &quesName, QObject *parent)
-    : QuesData(parent), quesName(quesName) {}
+inline QString numToLetter(int num) {
+    QString res;
+    do {
+        res += (char)('A' + num % 26);
+        num /= 26;
+    } while(num);
+    return res;
+}
+
+QuesChoiceData::QuesChoiceData(const QString &quesName, const QString &head, QObject *parent)
+    : QuesData(parent), quesName(quesName), head(head) {}
 QString QuesChoiceData::ansStr() const {
     QString str;
     // 遍历 choiceList 将选中的索引写入到 str 中
@@ -69,8 +78,38 @@ void QuesChoiceData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
 void QuesChoiceData::writeXmlTrueAns(QXmlStreamWriter &xml) const {
     xml.writeTextElement("v", ansStr());
 }
-bool QuesChoiceData::isRight(const QString &str) const {
-    return str == ansStr();
+QuesChoiceData::Score QuesChoiceData::score(const QString &str) const {
+    bool isRight = str == ansStr();
+    QString html;
+
+    if(!isRight) {
+        html += "<font color=\"red\">" + head + "</font>" + quesText;
+    } else html += head + quesText;
+
+    bool *arrIsStuChecked = new bool[choiceList.size()] { 0 };
+    QStringList list = str.split(';', QString::SkipEmptyParts);
+    for(const QString &part : qAsConst(list)) {
+        int num = part.toInt();
+        if(num >= 0 && num < choiceList.size())
+            arrIsStuChecked[num] = true;
+    }
+
+    int i = 0;
+    for(const Choice &choice : choiceList) {
+        html += "<br>";
+        if(choice.isChecked) {
+            html += "<font color=\"#22aa22\">" + numToLetter(i) + ".</font>";
+        } else html += numToLetter(i) + '.';
+        html += " ";
+        if(arrIsStuChecked[i]) {
+            html += "<font color=\"blue\">" + choice.text + "</font>";
+        } else html += choice.text;
+        ++i;
+    }
+
+    delete[] arrIsStuChecked;
+
+    return Score{ isRight, html };
 }
 
 
@@ -78,7 +117,7 @@ QuesChoice::QuesChoice(const QString &quesName, const QString &head, QWidget *pa
     : Ques(parent),
       mLabelQues(new QLabel(head)),
       mLayout(new QVBoxLayout), mLayoutButtons(new QVBoxLayout),
-      mHead(head), mData(quesName)
+      mHead(head), mData(quesName, head)
 {
     mLabelQues->setWordWrap(true);
 
@@ -159,15 +198,6 @@ void QuesChoice::writeXml(QXmlStreamWriter &xml) const {
 void QuesChoice::readXml(const QDomElement &elem) {
     mData.readXml(elem);
     updateWidgetsByData();
-}
-
-QString QuesChoice::numToLetter(int num) {
-    QString res;
-    do {
-        res += (char)('A' + num % 26);
-        num /= 26;
-    } while(num);
-    return res;
 }
 
 void QuesChoice::updateWidgetsByData() {

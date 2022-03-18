@@ -443,13 +443,16 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QDomDocument docAns;
             if(docAns.setContent(&file)) {
+                QList<QuesData::Score> scoreList;
                 int quesCnt = mListQues.size(), quesRight = 0;
                 QDomNode node = docAns.documentElement().firstChild();
                 int i = 0;
                 while(!node.isNull() && i < quesCnt) {
                     QDomElement elem = node.toElement();
                     if(!elem.isNull()) {
-                        if(mListQues[i]->isRight(elem.text()))
+                        QuesData::Score score = mListQues[i]->score(elem.text());
+                        scoreList << score;
+                        if(score.isRight)
                             ++quesRight;
                         ++i;
                     }
@@ -466,9 +469,14 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
                 xml.writeStartElement("ESDtg");
                 xml.writeAttribute("Type", "StuFinishRetval");
                 if(mScoreInClient) {
-                    xml.writeStartElement("TrueAnsList");
-                    for(const QuesData *ques : mListQues) {
-                        ques->writeXmlTrueAns(xml);
+                    xml.writeStartElement("ScoreList");
+                    xml.writeAttribute("Score", QString::number(quesRight));
+                    xml.writeAttribute("TotalScore", QString::number(quesCnt));
+                    for(const QuesData::Score &score : scoreList) {
+                        xml.writeStartElement("v");
+                        xml.writeAttribute("Right", QString::number(score.isRight));
+                        xml.writeCharacters(score.html);
+                        xml.writeEndElement();
                     }
                     xml.writeEndElement();
                 }

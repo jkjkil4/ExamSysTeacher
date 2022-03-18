@@ -15,7 +15,7 @@ public:
     void readXml(const QDomElement &elem) override;
     void writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const override;
     void writeXmlTrueAns(QXmlStreamWriter &xml) const override;
-    bool isRight(const QString &str) const override;
+    Score score(const QString &str) const override;
 
     QString mQuesText;
     QString mTextLeft = "错", mTextRight = "对";

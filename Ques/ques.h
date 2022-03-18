@@ -42,12 +42,18 @@ public:
      */
     virtual void writeXmlTrueAns(QXmlStreamWriter &xml) const;
 
+    struct Score {
+        Score() = default;
+        Score(bool isRight, const QString &html) : isRight(isRight), html(html) {}
+        bool isRight = false;
+        QString html;
+    };
     /**
-     * @brief   判断作答是否正确
+     * @brief   改分
      * @param   str     用于判断的字符串
-     * @return  是否正确
+     * @return  Score对象，包含是否正确和显示的html
      */
-    virtual bool isRight(const QString &str) const;
+    virtual Score score(const QString &str) const;
 };
 
 /**

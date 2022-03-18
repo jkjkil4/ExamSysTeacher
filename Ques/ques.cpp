@@ -10,7 +10,7 @@ void QuesData::writeXml(QXmlStreamWriter &) const {}
 void QuesData::readXml(const QDomElement &) {}
 void QuesData::writeXmlWithoutTrueAns(QXmlStreamWriter &) const {}
 void QuesData::writeXmlTrueAns(QXmlStreamWriter &) const {}
-bool QuesData::isRight(const QString &) const { return false; }
+QuesData::Score QuesData::score(const QString &) const { return Score(); }
 
 Ques::Ques(QWidget *parent)
     : QWidget(parent),

@@ -33,8 +33,16 @@ void QuesWhetherData::writeXmlWithoutTrueAns(QXmlStreamWriter &xml) const {
 void QuesWhetherData::writeXmlTrueAns(QXmlStreamWriter &xml) const {
     xml.writeTextElement("v", QString::number(mState));
 }
-bool QuesWhetherData::isRight(const QString &str) const {
-    return str.toInt() == mState;
+QuesWhetherData::Score QuesWhetherData::score(const QString &str) const {
+    bool isRight = str.toInt() == mState;
+    QString html;
+    if(!isRight) {
+        html += "<font color=\"red\">（判断题）</font>" + mQuesText;
+    } else html += "（判断题）" + mQuesText;
+    html += QString("<br>答案: %1<br>考生作答: %2").arg(
+                mState == DoubleSlideButton::Right ? mTextRight : mTextLeft,
+                str.toInt() == DoubleSlideButton::Right ? mTextRight : mTextLeft);
+    return Score{ isRight, html };
 }
 
 

@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 
 QuesMultiChoiceData::QuesMultiChoiceData(QObject *parent)
-    : QuesChoiceData("QuesMultiChoice", parent) {}
+    : QuesChoiceData("QuesMultiChoice", "（多选题）", parent) {}
 
 
 QuesMultiChoice::QuesMultiChoice(QWidget *parent)

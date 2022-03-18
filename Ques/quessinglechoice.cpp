@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 
 QuesSingleChoiceData::QuesSingleChoiceData(QObject *parent)
-    : QuesChoiceData("QuesSingleChoice", parent) {}
+    : QuesChoiceData("QuesSingleChoice", "（单选题）", parent) {}
 
 
 QuesSingleChoice::QuesSingleChoice(QWidget *parent)
