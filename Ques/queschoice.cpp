@@ -96,14 +96,15 @@ QuesChoiceData::Score QuesChoiceData::score(const QString &str) const {
 
     int i = 0;
     for(const Choice &choice : choiceList) {
-        html += "<br>";
-        if(choice.isChecked) {
-            html += "<font color=\"#22aa22\">" + numToLetter(i) + ".</font>";
-        } else html += numToLetter(i) + '.';
-        html += " ";
-        if(arrIsStuChecked[i]) {
-            html += "<font color=\"blue\">" + choice.text + "</font>";
-        } else html += choice.text;
+        html += "<br>&nbsp;&nbsp;&nbsp;";
+        html += "<span style=\"";
+        if(choice.isChecked)
+            html += "color: #22aa22;";
+        if(arrIsStuChecked[i])
+            html += "text-decoration:underline;";
+        html += "\">";
+        html += "&nbsp;" + numToLetter(i) + ". " + choice.text.toHtmlEscaped() + "&nbsp;";
+        html += "</span>";
         ++i;
     }
 
