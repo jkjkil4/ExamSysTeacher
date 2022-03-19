@@ -467,8 +467,10 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
                 log(client, "\"" + stuName + "\" 交卷 成功");
 
                 // 用于将改分信息写入XML
-                auto fnWriteToXml = [quesRight, quesCnt, &scoreList](QXmlStreamWriter &xml) {
+                auto fnWriteToXml = [this, &stuName, quesRight, quesCnt, &scoreList](QXmlStreamWriter &xml) {
                     xml.writeStartElement("ScoreList");
+                    xml.writeAttribute("ExamName", ui->labelExamName->text());
+                    xml.writeAttribute("StuName", stuName);
                     xml.writeAttribute("Score", QString::number(quesRight));
                     xml.writeAttribute("TotalScore", QString::number(quesCnt));
                     for(const QuesData::Score &score : scoreList) {
