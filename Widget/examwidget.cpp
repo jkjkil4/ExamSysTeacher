@@ -139,7 +139,6 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     }
     if(mAddress.isNull())
         mAddress = QHostAddress::LocalHost;
-    mMulticastAddress = QHostAddress("239.255.43.21");
 
     // 配置控件
     ui->labelExamName->setText(mName);
@@ -325,9 +324,9 @@ void ExamWidget::onSwitchLogVisible() {
 
 void ExamWidget::onTimeTimerTimeout() {
     updateState();
-    ++mMulticastSecCounter;
-    if(mMulticastSecCounter >= 10){
-        mMulticastSecCounter = 0;
+    ++mUpdTimeSecCounter;
+    if(mUpdTimeSecCounter >= 10){
+        mUpdTimeSecCounter = 0;
         QByteArray array;
         QXmlStreamWriter xml(&array);
         xml.writeStartDocument();
@@ -338,7 +337,8 @@ void ExamWidget::onTimeTimerTimeout() {
         xml.writeCharacters(QDateTime::currentDateTime().toString("yyyy/M/d H:m:s"));
         xml.writeEndElement();
         xml.writeEndDocument();
-        mUdpSocket->writeDatagram(array, mMulticastAddress, 40565);
+        for(auto iter = mMapStuClient.cbegin(); iter != mMapStuClient.cend(); ++iter)
+            tcpSendDatagram(iter.key(), array);
     }
 }
 

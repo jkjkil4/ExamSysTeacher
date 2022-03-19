@@ -106,8 +106,7 @@ private:
     bool mHasEnd;
     Error mError = NormalError;
     QHostAddress mAddress;
-    QHostAddress mMulticastAddress;
-    int mMulticastSecCounter = 0;
+    int mUpdTimeSecCounter = 0;
 
     // 考试信息
     QString mName;
