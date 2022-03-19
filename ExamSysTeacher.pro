@@ -11,6 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ExamSysTeacher
 TEMPLATE = app
 
+RC_ICONS += ExamSysTeacher.ico
+RC_LANG = 0x0004
+VERSION = 0.1.0
+QMAKE_TARGET_DESCRIPTION = "ExamSysTeacher"
+QMAKE_TARGET_COPYRIGHT = "jkjkil4"
+
 # QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 
 # The following define makes your compiler emit warnings if you use
