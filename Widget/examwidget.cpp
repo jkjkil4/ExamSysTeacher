@@ -443,6 +443,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QDomDocument docAns;
             if(docAns.setContent(&file)) {
+                // 得到改分信息
                 QList<QuesData::Score> scoreList;
                 int quesCnt = mListQues.size(), quesRight = 0;
                 QDomNode node = docAns.documentElement().firstChild();
@@ -458,17 +459,15 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
                     }
                     node = node.nextSibling();
                 }
+                // 设置得分
                 setStuScore(stuName, quesRight);
                 mConfigFile.setValue(QString("Stu/%1_Score").arg(ind), QString::number(quesRight));
 
+                // 输出日志
                 log(client, "\"" + stuName + "\" 交卷 成功");
 
-                QByteArray array;
-                QXmlStreamWriter xml(&array);
-                xml.writeStartDocument();
-                xml.writeStartElement("ESDtg");
-                xml.writeAttribute("Type", "StuFinishRetval");
-                if(mScoreInClient) {
+                // 用于将改分信息写入XML
+                auto fnWriteToXml = [quesRight, quesCnt, &scoreList](QXmlStreamWriter &xml) {
                     xml.writeStartElement("ScoreList");
                     xml.writeAttribute("Score", QString::number(quesRight));
                     xml.writeAttribute("TotalScore", QString::number(quesCnt));
@@ -479,7 +478,27 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
                         xml.writeEndElement();
                     }
                     xml.writeEndElement();
+                };
+
+                // 将改分信息写入文件
+                QFile fileScore(mDirPath + "/" + QString::number(ind) + ".stuscore");
+                if(fileScore.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                    QXmlStreamWriter xml(&fileScore);
+                    xml.setAutoFormatting(true);
+                    xml.writeStartDocument();
+                    fnWriteToXml(xml);
+                    xml.writeEndDocument();
+                    fileScore.close();
                 }
+
+                // 发送改分信息
+                QByteArray array;
+                QXmlStreamWriter xml(&array);
+                xml.writeStartDocument();
+                xml.writeStartElement("ESDtg");
+                xml.writeAttribute("Type", "StuFinishRetval");
+                if(mScoreInClient)
+                    fnWriteToXml(xml);
                 xml.writeEndElement();
                 xml.writeEndDocument();
                 tcpSendDatagram(client, array);

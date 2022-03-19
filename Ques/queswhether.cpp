@@ -39,9 +39,10 @@ QuesWhetherData::Score QuesWhetherData::score(const QString &str) const {
     if(!isRight) {
         html += "<font color=\"red\">（判断题）</font>" + mQuesText;
     } else html += "（判断题）" + mQuesText;
-    html += QString("<br>&nbsp;&nbsp;&nbsp;&nbsp;答案: %1<br>&nbsp;&nbsp;&nbsp;&nbsp;考生作答: %2").arg(
-                mState == DoubleSlideButton::Right ? mTextRight : mTextLeft,
-                str.toInt() == DoubleSlideButton::Right ? mTextRight : mTextLeft);
+    html += QString("<br>&nbsp;&nbsp;&nbsp;&nbsp;答案: %1").arg(mState == DoubleSlideButton::Right ? mTextRight : mTextLeft);
+    if(str.toInt() == DoubleSlideButton::Mid) {
+        html += QString("<br>&nbsp;&nbsp;&nbsp;&nbsp;考生未作答");
+    } else html += QString("<br>&nbsp;&nbsp;&nbsp;&nbsp;考生作答: %1").arg(str.toInt() == DoubleSlideButton::Right ? mTextRight : mTextLeft);
     return Score{ isRight, html };
 }
 
