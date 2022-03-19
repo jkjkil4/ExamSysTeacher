@@ -67,6 +67,16 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QLabel" name="labelTipDbClk">
+           <property name="styleSheet">
+            <string notr="true">color: gray;</string>
+           </property>
+           <property name="text">
+            <string>双击成绩可显示详情</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -96,7 +106,7 @@
      <item>
       <layout class="QVBoxLayout" name="layoutRight">
        <property name="spacing">
-        <number>16</number>
+        <number>8</number>
        </property>
        <item>
         <widget class="QGroupBox" name="boxExamInfo">
@@ -250,6 +260,16 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="styleSheet">
+             <string notr="true">color: gray</string>
+            </property>
+            <property name="text">
+             <string>若网络异常，可重开此页面重试</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

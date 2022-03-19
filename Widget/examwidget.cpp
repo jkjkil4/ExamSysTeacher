@@ -22,6 +22,7 @@
 #include "Ques/quessinglechoice.h"
 #include "Ques/quesmultichoice.h"
 #include "Ques/queswhether.h"
+#include "Widget/scorewidget.h"
 
 ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
     : QWidget(parent), ui(new Ui::ExamWidget),
@@ -185,6 +186,7 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
 
         QTableWidgetItem *itemScore = new QTableWidgetItem("暂无");
         itemScore->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+        itemScore->setData(Qt::UserRole, i);
         ui->tableWidget->setItem(i, 5, itemScore);
 
         // 读取考生进度
@@ -213,11 +215,13 @@ ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
         i++;
     }
 
+    ui->listWidgetLog->setVisible(false);
+    connect(ui->btnShowLog, &QPushButton::clicked, this, &ExamWidget::onSwitchLogVisible);
+
     mTimeTimer->start(1000);
     connect(mTimeTimer, &QTimer::timeout, this, &ExamWidget::onTimeTimerTimeout);
 
-    ui->listWidgetLog->setVisible(false);
-    connect(ui->btnShowLog, &QPushButton::clicked, this, &ExamWidget::onSwitchLogVisible);
+    connect(ui->tableWidget, &QTableWidget::itemDoubleClicked, this, &ExamWidget::onItemDoubleClicked);
 
     setWindowTitle(mName);
     updateState();
@@ -336,6 +340,23 @@ void ExamWidget::onTimeTimerTimeout() {
         xml.writeEndDocument();
         mUdpSocket->writeDatagram(array, mMulticastAddress, 40565);
     }
+}
+
+void ExamWidget::onItemDoubleClicked(QTableWidgetItem *item) {
+    if(item->column() != 5)
+        return;
+    int ind = item->data(Qt::UserRole).toInt();
+    QFile file(mDirPath + "/" + QString::number(ind) + ".stuscore");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    QDomDocument doc;
+    bool ret = doc.setContent(&file);
+    file.close();
+    if(!ret) return;
+
+    ScoreWidget *widget = new ScoreWidget(doc.documentElement());
+    widget->setAttribute(Qt::WA_DeleteOnClose);
+    widget->show();
 }
 
 bool ExamWidget::parseUdpDatagram(const QByteArray &array) {

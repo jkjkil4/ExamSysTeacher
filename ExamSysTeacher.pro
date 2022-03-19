@@ -40,6 +40,7 @@ SOURCES += \
         Widget/examhistory.cpp \
         Widget/examhistoryitemwidget.cpp \
         Widget/examwidget.cpp \
+        Widget/scorewidget.cpp \
         main.cpp \
         mainwindow.cpp
 
@@ -58,6 +59,7 @@ HEADERS += \
         Widget/examhistory.h \
         Widget/examhistoryitemwidget.h \
         Widget/examwidget.h \
+        Widget/scorewidget.h \
         mainwindow.h
 
 # Default rules for deployment.

@@ -2,4 +2,8 @@
     <qresource prefix="/font">
         <file>src/NotoSansSChineseMedium-7.ttf</file>
     </qresource>
+    <qresource prefix="/icon">
+        <file>src/ArrowDown.png</file>
+        <file>src/ArrowUp.png</file>
+    </qresource>
 </RCC>

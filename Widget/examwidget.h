@@ -13,6 +13,8 @@ namespace Ui {
 class ExamWidget;
 }
 
+class QTableWidgetItem;
+
 class QuesData;
 class QDomElement;
 class QUdpSocket;
@@ -60,6 +62,8 @@ public slots:
     void onSwitchLogVisible();
     /** @brief  响应定时器事件 */
     void onTimeTimerTimeout();
+    /** @brief  响应item双击事件，显示具体改分情况 */
+    void onItemDoubleClicked(QTableWidgetItem *item);
 
 public:
     bool parseUdpDatagram(const QByteArray &array);
