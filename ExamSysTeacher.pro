@@ -17,7 +17,7 @@ VERSION = 0.1.0
 QMAKE_TARGET_DESCRIPTION = "ExamSysTeacher"
 QMAKE_TARGET_COPYRIGHT = "jkjkil4"
 
-# QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
+CONFIG(release, debug|release): QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
