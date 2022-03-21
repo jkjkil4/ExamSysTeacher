@@ -9,14 +9,16 @@
 #include <QLockFile>
 #include <QSettings>
 
+#include "Ques/ques.h"
+
 namespace Ui {
 class ExamWidget;
 }
 
 class QTableWidgetItem;
 
-class QuesData;
 class QDomElement;
+class QXmlStreamWriter;
 class QUdpSocket;
 class QTcpServer;
 class QTcpSocket;
@@ -39,7 +41,7 @@ public:
     };
     Q_ENUM(Error)
 
-    explicit ExamWidget(const QString &dirName, bool hasEnd = false, QWidget *parent = nullptr);
+    explicit ExamWidget(const QString &dirName, QWidget *parent = nullptr);
     ~ExamWidget() override;
 
     Error error() { return mError; }
@@ -56,6 +58,14 @@ public:
 
     void log(const QString &what);
     void log(const QTcpSocket *client, const QString &what);
+
+    struct ScoreResult {
+        int quesRight;
+        QList<QuesData::Score> scoreList;
+    };
+    ScoreResult score(const QString &stuName, bool *ok);
+    void scoreAll();
+    void writeScoreResultToXml(const QString &stuName, const ScoreResult &sr, QXmlStreamWriter &xml);
 
 public slots:
     /** @brief  响应切换日志是否可见 */
@@ -103,7 +113,7 @@ private:
     QSettings mConfigFile;
 
     // 基本属性
-    bool mHasEnd;
+    bool mHasEnd = false;
     Error mError = NormalError;
     QHostAddress mAddress;
     int mUpdTimeSecCounter = 0;

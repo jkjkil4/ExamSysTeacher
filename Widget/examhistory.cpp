@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QXmlStreamReader>
 #include <QDateTime>
+#include <QAction>
 
 #include "Util/header.h"
 #include "examhistoryitemwidget.h"
@@ -13,6 +14,7 @@ ExamHistory::ExamHistory(QWidget *parent)
       ui(new Ui::ExamHistory)
 {
     ui->setupUi(this);
+    ui->listWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
     struct Exam {
         QString dirName, name;
@@ -56,6 +58,14 @@ ExamHistory::ExamHistory(QWidget *parent)
         mExamDirName = ((ExamHistoryItemWidget*)ui->listWidget->itemWidget(item))->dirName();
         accept();
     });
+    connect(ui->listWidget, &QListWidget::customContextMenuRequested, [this](const QPoint &pos) {
+        Q_UNUSED(this)
+        Q_UNUSED(pos)
+//        int row = ui->listWidget->currentRow();
+
+//        QAction actEnter("进入");
+    });
+
     connect(ui->btnEnter, &QPushButton::clicked, [this] {
         QList<QListWidgetItem*> items = ui->listWidget->selectedItems();
         if(items.isEmpty())

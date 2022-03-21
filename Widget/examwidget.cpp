@@ -24,13 +24,12 @@
 #include "Ques/queswhether.h"
 #include "Widget/scorewidget.h"
 
-ExamWidget::ExamWidget(const QString &dirName, bool hasEnd, QWidget *parent)
+ExamWidget::ExamWidget(const QString &dirName, QWidget *parent)
     : QWidget(parent), ui(new Ui::ExamWidget),
       mUdpSocket(new QUdpSocket(this)), mTcpServer(new QTcpServer(this)),
       mTimeTimer(new QTimer(this)),
       mDirName(dirName), mDirPath(APP_DIR + "/Exported/" + dirName),
       mLockFile(mDirPath + "/_.lock"), mConfigFile(mDirPath + "/_.ini", QSettings::IniFormat),
-      mHasEnd(hasEnd),
       availableQues({
                     {"QuesSingleChoice", &QuesSingleChoiceData::staticMetaObject},
                     {"QuesMultiChoice", &QuesMultiChoiceData::staticMetaObject},
@@ -312,6 +311,118 @@ void ExamWidget::log(const QTcpSocket *client, const QString &what) {
     log(QString("[%1:%2]").arg(client->peerAddress().toString()).arg(client->peerPort()) + what);
 }
 
+ExamWidget::ScoreResult ExamWidget::score(const QString &stuName, bool *ok) {
+    int ind = stuInd(stuName);
+    // 尝试打开文件
+    QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if(ok) *ok = false;
+        log("\"" + stuName + "\" 改分 失败（文件无法访问）");
+        return ScoreResult{};
+    }
+    // 尝试转为QDomDocument
+    QDomDocument docAns;
+    if(!docAns.setContent(&file)) {
+        if(ok) *ok = false;
+        log("\"" + stuName + "\" 改分 失败（文件无效）");
+        return ScoreResult{};
+    }
+
+    // 得到改分信息
+    QList<QuesData::Score> scoreList;
+    int quesCnt = mListQues.size(), quesRight = 0;
+    QDomNode node = docAns.documentElement().firstChild();
+    int i = 0;
+    while(!node.isNull() && i < quesCnt) {
+        QDomElement elem = node.toElement();
+        if(!elem.isNull()) {
+            QuesData::Score score = mListQues[i]->score(elem.text());
+            scoreList << score;
+            if(score.isRight)
+                ++quesRight;
+            ++i;
+        }
+        node = node.nextSibling();
+    }
+    // 设置得分
+    setStuScore(stuName, quesRight);
+    mConfigFile.setValue(QString("Stu/%1_Score").arg(ind), QString::number(quesRight));
+    mConfigFile.setValue(QString("Stu/%1_Scored").arg(ind), true);
+
+    // 输出日志
+    log("\"" + stuName + "\" 改分 成功");
+
+    if(ok) *ok = true;
+    return ScoreResult{ quesRight, scoreList };
+}
+
+void ExamWidget::scoreAll() {
+    int i = 0;
+    for(auto iter = mListStu.cbegin(); iter != mListStu.cend(); ++iter, ++i) {
+        QString str = QString::number(i);
+
+        // 如果已经改过分，则忽略
+        if(!mConfigFile.value(QString("Stu/%1_Scored").arg(i), false).toBool())
+            continue;
+
+        QFile ansFile(mDirPath + "/" + str + ".stuans");
+        // 如果不存在作答，则忽略
+        if(!ansFile.exists())
+            continue;
+
+        bool ok;
+        ScoreResult sr = score(iter->name, &ok);
+        if(ok) {
+            // 将改分信息写入文件
+            QFile fileScore(mDirPath + "/" + QString::number(i) + ".stuscore");
+            if(fileScore.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QXmlStreamWriter xml(&fileScore);
+                xml.setAutoFormatting(true);
+                xml.writeStartDocument();
+                writeScoreResultToXml(iter->name, sr, xml);
+                xml.writeEndDocument();
+                fileScore.close();
+            } else log("写入 \"" + iter->name + "\" 得分文件失败");
+
+            // 得到对应客户端
+            QTcpSocket *client = nullptr;
+            for(auto iter2 = mMapStuClient.cbegin(); iter2 != mMapStuClient.cend(); ++iter2) {
+                if(iter2.value().stuName == iter->name) {
+                    client = iter2.key();
+                    break;
+                }
+            }
+            // 发送改分信息
+            if(client) {
+                QByteArray array;
+                QXmlStreamWriter xml(&array);
+                xml.writeStartDocument();
+                xml.writeStartElement("ESDtg");
+                xml.writeAttribute("Type", "StuFinishRetval");
+                if(mScoreInClient)
+                    writeScoreResultToXml(iter->name, sr, xml);
+                xml.writeEndElement();
+                xml.writeEndDocument();
+                tcpSendDatagram(client, array);
+            }
+        }
+    }
+}
+void ExamWidget::writeScoreResultToXml(const QString &stuName, const ScoreResult &sr, QXmlStreamWriter &xml) {
+    xml.writeStartElement("ScoreList");
+    xml.writeAttribute("ExamName", ui->labelExamName->text());
+    xml.writeAttribute("StuName", stuName);
+    xml.writeAttribute("Score", QString::number(sr.quesRight));
+    xml.writeAttribute("TotalScore", QString::number(mListQues.size()));
+    for(const QuesData::Score &score : sr.scoreList) {
+        xml.writeStartElement("v");
+        xml.writeAttribute("Right", QString::number(score.isRight));
+        xml.writeCharacters(score.html);
+        xml.writeEndElement();
+    }
+    xml.writeEndElement();
+}
+
 void ExamWidget::onSwitchLogVisible() {
     if(ui->listWidgetLog->isVisible()) {
         ui->btnShowLog->setText("显示日志");
@@ -324,6 +435,26 @@ void ExamWidget::onSwitchLogVisible() {
 
 void ExamWidget::onTimeTimerTimeout() {
     updateState();
+    if(!mHasEnd && QDateTime::currentDateTime() >= mDateTimeEnd) {
+        mHasEnd = true;
+
+        // 改分
+        scoreAll();
+
+        // 考试结束信息
+        QByteArray array;
+        QXmlStreamWriter xml(&array);
+        xml.writeStartDocument();
+        xml.writeStartElement("ESDtg");
+        xml.writeAttribute("Type", "SrvClosed");
+        xml.writeEndElement();
+        xml.writeEndDocument();
+        // 向未改分的客户端发送考试结束信息
+        for(auto iter = mMapStuClient.cbegin(); iter != mMapStuClient.cend(); ++iter) {
+            if(!mConfigFile.value(QString("Stu/%1_Scored").arg(stuInd(iter->stuName)), false).toBool())
+                tcpSendDatagram(iter.key(), array);
+        }
+    }
     ++mUpdTimeSecCounter;
     if(mUpdTimeSecCounter >= 10){
         mUpdTimeSecCounter = 0;
@@ -436,83 +567,49 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
         qint64 ret = tcpSendDatagram(client, array);
         log(client, QString("传输试卷 长度:%1 发送:%2").arg(array.length() + 4).arg(ret));
     } else if(type == "AnsProc") {
-        QString strProc = root.text();
-        mConfigFile.setValue(QString("Stu/%1_Proc").arg(stuInd(stuName)), strProc);
-        setStuProc(stuName, strProc.toInt());
+        if(QDateTime::currentDateTime() < mDateTimeEnd) {
+            QString strProc = root.text();
+            mConfigFile.setValue(QString("Stu/%1_Proc").arg(stuInd(stuName)), strProc);
+            setStuProc(stuName, strProc.toInt());
+        }
     } else if(type == "StuAns") {
-        int ind = stuInd(stuName);
-        QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
-        if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.write(array);
-            file.close();
-            setStuUploadTime(stuName, QDateTime::fromString(root.attribute("Time"), "yyyy/M/d H:m:s"));
-            log(client, "\"" + stuName + "\" 上传作答 成功");
+        if(QDateTime::currentDateTime() < mDateTimeEnd) {
+            int ind = stuInd(stuName);
+            QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
+            if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                file.write(array);
+                file.close();
+                setStuUploadTime(stuName, QDateTime::fromString(root.attribute("Time"), "yyyy/M/d H:m:s"));
+                log(client, "\"" + stuName + "\" 上传作答 成功");
 
-            QByteArray array;
-            QXmlStreamWriter xml(&array);
-            xml.writeStartDocument();
-            xml.writeStartElement("ESDtg");
-            xml.writeAttribute("Type", "StuAnsReceived");
-            xml.writeCharacters(root.attribute("Time"));
-            xml.writeEndElement();
-            xml.writeEndDocument();
-            tcpSendDatagram(client, array);
-        } else log(client, "\"" + stuName + "\" 上传作答 失败");
+                QByteArray array;
+                QXmlStreamWriter xml(&array);
+                xml.writeStartDocument();
+                xml.writeStartElement("ESDtg");
+                xml.writeAttribute("Type", "StuAnsReceived");
+                xml.writeCharacters(root.attribute("Time"));
+                xml.writeEndElement();
+                xml.writeEndDocument();
+                tcpSendDatagram(client, array);
+            } else log(client, "\"" + stuName + "\" 上传作答 失败");
+        }
     } else if(type == "StuFinish") {
-        int ind = stuInd(stuName);
-        QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
-        if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QDomDocument docAns;
-            if(docAns.setContent(&file)) {
-                // 得到改分信息
-                QList<QuesData::Score> scoreList;
-                int quesCnt = mListQues.size(), quesRight = 0;
-                QDomNode node = docAns.documentElement().firstChild();
-                int i = 0;
-                while(!node.isNull() && i < quesCnt) {
-                    QDomElement elem = node.toElement();
-                    if(!elem.isNull()) {
-                        QuesData::Score score = mListQues[i]->score(elem.text());
-                        scoreList << score;
-                        if(score.isRight)
-                            ++quesRight;
-                        ++i;
-                    }
-                    node = node.nextSibling();
-                }
-                // 设置得分
-                setStuScore(stuName, quesRight);
-                mConfigFile.setValue(QString("Stu/%1_Score").arg(ind), QString::number(quesRight));
-
-                // 输出日志
-                log(client, "\"" + stuName + "\" 交卷 成功");
-
-                // 用于将改分信息写入XML
-                auto fnWriteToXml = [this, &stuName, quesRight, quesCnt, &scoreList](QXmlStreamWriter &xml) {
-                    xml.writeStartElement("ScoreList");
-                    xml.writeAttribute("ExamName", ui->labelExamName->text());
-                    xml.writeAttribute("StuName", stuName);
-                    xml.writeAttribute("Score", QString::number(quesRight));
-                    xml.writeAttribute("TotalScore", QString::number(quesCnt));
-                    for(const QuesData::Score &score : scoreList) {
-                        xml.writeStartElement("v");
-                        xml.writeAttribute("Right", QString::number(score.isRight));
-                        xml.writeCharacters(score.html);
-                        xml.writeEndElement();
-                    }
-                    xml.writeEndElement();
-                };
-
+        if(QDateTime::currentDateTime() < mDateTimeEnd) {
+            log(client, "\"" + stuName + "\" 交卷");
+            bool ok;
+            ScoreResult sr = score(stuName, &ok);
+            if(ok) {
+                int ind = stuInd(stuName);
                 // 将改分信息写入文件
                 QFile fileScore(mDirPath + "/" + QString::number(ind) + ".stuscore");
                 if(fileScore.open(QIODevice::WriteOnly | QIODevice::Text)) {
                     QXmlStreamWriter xml(&fileScore);
                     xml.setAutoFormatting(true);
                     xml.writeStartDocument();
-                    fnWriteToXml(xml);
+                    writeScoreResultToXml(stuName, sr, xml);
                     xml.writeEndDocument();
                     fileScore.close();
-                }
+                } else log("写入 \"" + stuName + "\" 得分文件失败");
 
                 // 发送改分信息
                 QByteArray array;
@@ -521,12 +618,12 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
                 xml.writeStartElement("ESDtg");
                 xml.writeAttribute("Type", "StuFinishRetval");
                 if(mScoreInClient)
-                    fnWriteToXml(xml);
+                    writeScoreResultToXml(stuName, sr, xml);
                 xml.writeEndElement();
                 xml.writeEndDocument();
                 tcpSendDatagram(client, array);
-            } else log(client, "\"" + stuName + "\" 交卷 失败（文件无效）");
-        } else log(client, "\"" + stuName + "\" 交卷 失败（文件无法访问）");
+            }
+        }
     } else return false;
 
     return true;
@@ -560,6 +657,14 @@ void ExamWidget::onUdpReadyRead() {
 
 void ExamWidget::onNewConnection() {
     QTcpSocket *client = mTcpServer->nextPendingConnection();
+
+    // 当考试已结束时，停止连入
+    if(QDateTime::currentDateTime() >= mDateTimeEnd) {
+        udpSendVerifyErr("考试已结束", client->peerAddress());
+        client->disconnectFromHost();
+        return;
+    }
+
     QString stuName;
     {   // 验证密码
         QObject obj;            // 用于临时槽函数
@@ -626,6 +731,7 @@ void ExamWidget::onNewConnection() {
 
     // 设置相关内容
     mMapStuClient[client] = stuName;
+    mConfigFile.setValue(QString("Stu/%1_Scored").arg(stuInd(stuName)), false);
     setStuIsConnected(stuName, true);
     connect(client, &QTcpSocket::readyRead, this, &ExamWidget::onTcpReadyRead);
     connect(client, &QTcpSocket::disconnected, this, [this, client, stuName] {
