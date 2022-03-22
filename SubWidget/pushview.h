@@ -57,6 +57,8 @@ public slots:
     void onImport();
     /** @brief  响应发放试卷操作 */
     void onPush();
+    /** @brief  响应btnTip */
+    void onTip();
 
 signals:
     void back();

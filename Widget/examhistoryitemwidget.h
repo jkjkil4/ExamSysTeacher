@@ -14,9 +14,10 @@ public:
                                    const QDateTime &dt, bool isEnd, QWidget *parent = nullptr);
 
     QString dirName() const { return mDirName; }
+    QString name() const { return mName; }
 
 private:
-    QString mDirName;
+    QString mDirName, mName;
 
     QLabel *mLabelName, *mLabelDateTime, *mLabelState;
     QVBoxLayout *mLayoutLeft;

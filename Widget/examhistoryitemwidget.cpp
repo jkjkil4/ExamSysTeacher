@@ -7,7 +7,7 @@
 
 ExamHistoryItemWidget::ExamHistoryItemWidget(const QString &dirName, const QString &name,
                                              const QDateTime &dt, bool isEnd, QWidget *parent)
-    : QWidget(parent), mDirName(dirName),
+    : QWidget(parent), mDirName(dirName), mName(name),
       mLabelName(new QLabel(name)), mLabelDateTime(new QLabel("创建时间: " + dt.toString("yyyy/M/d HH:mm:ss"))),
       mLabelState(new QLabel(isEnd ? "已结束" : "进行中")),
       mLayoutLeft(new QVBoxLayout), mLayoutMain(new QHBoxLayout)

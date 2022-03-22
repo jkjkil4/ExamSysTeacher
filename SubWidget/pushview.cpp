@@ -19,6 +19,7 @@ PushView::PushView(EditView *editView, QWidget *parent) :
     ui(new Ui::PushView), mEditView(editView)
 {
     ui->setupUi(this);
+    ui->btnTip->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxQuestion));
 
     // 初始化表头
     const QStringList horHeaderText = {
@@ -37,6 +38,7 @@ PushView::PushView(EditView *editView, QWidget *parent) :
     connect(ui->btnImport, &QPushButton::clicked, this, &PushView::onImport);
     connect(ui->btnBack, SIGNAL(clicked()), this, SIGNAL(back()));
     connect(ui->btnPush, &QPushButton::clicked, this, &PushView::onPush);
+    connect(ui->btnTip, &QPushButton::clicked, this, &PushView::onTip);
 }
 
 PushView::~PushView()
@@ -184,4 +186,13 @@ void PushView::onPush() {
     fileExported.close();
 
     emit exam(dirName);
+}
+
+void PushView::onTip() {
+    QMessageBox::information(this, "考生列表格式",
+                             "首先创建一个文本文件，里面输入考生的 <b>名称和密码</b><br>"
+                             "其格式为:<br>"
+                             "&nbsp;&nbsp;①每行一个考生信息<br>"
+                             "&nbsp;&nbsp;②对于每行的信息，格式为 <b>名称|密码</b>，中间用<b>英文竖线符号</b>隔开<br>"
+                             "完成编辑后，导入即可");
 }

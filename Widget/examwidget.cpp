@@ -729,9 +729,16 @@ void ExamWidget::onNewConnection() {
         tcpSendDatagram(client, array);
     }
 
+    // 如果为交卷后进入，则删除原有作答
+    int ind = stuInd(stuName);
+    if(mConfigFile.value(QString("Stu/%1_Scored").arg(ind), false).toBool()) {
+        QFile file(mDirPath + "/" + QString::number(ind) + ".stuans");
+        file.remove();
+    }
+    mConfigFile.setValue(QString("Stu/%1_Scored").arg(ind), false);
+
     // 设置相关内容
     mMapStuClient[client] = stuName;
-    mConfigFile.setValue(QString("Stu/%1_Scored").arg(stuInd(stuName)), false);
     setStuIsConnected(stuName, true);
     connect(client, &QTcpSocket::readyRead, this, &ExamWidget::onTcpReadyRead);
     connect(client, &QTcpSocket::disconnected, this, [this, client, stuName] {

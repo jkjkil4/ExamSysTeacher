@@ -4,7 +4,8 @@
 #include <QDir>
 #include <QXmlStreamReader>
 #include <QDateTime>
-#include <QAction>
+#include <QMenu>
+#include <QMessageBox>
 
 #include "Util/header.h"
 #include "examhistoryitemwidget.h"
@@ -58,12 +59,37 @@ ExamHistory::ExamHistory(QWidget *parent)
         mExamDirName = ((ExamHistoryItemWidget*)ui->listWidget->itemWidget(item))->dirName();
         accept();
     });
-    connect(ui->listWidget, &QListWidget::customContextMenuRequested, [this](const QPoint &pos) {
-        Q_UNUSED(this)
-        Q_UNUSED(pos)
-//        int row = ui->listWidget->currentRow();
+    connect(ui->listWidget, &QListWidget::customContextMenuRequested, [this](const QPoint &) {
+        int row = ui->listWidget->currentRow();
+        QListWidgetItem *item = ui->listWidget->item(row);
+        ExamHistoryItemWidget *widget = (ExamHistoryItemWidget*)ui->listWidget->itemWidget(item);
 
-//        QAction actEnter("进入");
+        QAction actEnter("进入");
+        connect(&actEnter, &QAction::triggered, [this, widget] {
+            mExamDirName = widget->dirName();
+            accept();
+        });
+
+        QAction actRemove("移除");
+        connect(&actRemove, &QAction::triggered, [this, row, widget] {
+            int ret = QMessageBox::information(this, "提示", "确认移除 \"" + widget->name() + "\" 吗?", "确认", "取消");
+            if(ret == 1)
+                return;
+            QDir dir;
+            if(!dir.cd(APP_DIR + "/Exported/" + widget->dirName()))
+                return;
+            if(!dir.removeRecursively()) {
+                QMessageBox::critical(this, "错误", "移除失败");
+                return;
+            }
+            delete ui->listWidget->takeItem(row);
+        });
+
+        QMenu menu;
+        menu.addAction(&actEnter);
+        menu.addSeparator();
+        menu.addAction(&actRemove);
+        menu.exec(cursor().pos());
     });
 
     connect(ui->btnEnter, &QPushButton::clicked, [this] {

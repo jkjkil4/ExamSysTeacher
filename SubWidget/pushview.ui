@@ -79,7 +79,7 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="layoutTableHead" stretch="1,1,7">
+        <layout class="QHBoxLayout" name="layoutTableHead" stretch="1,1,7,0">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -148,6 +148,9 @@ QPushButton:pressed{
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnTip"/>
          </item>
         </layout>
        </item>

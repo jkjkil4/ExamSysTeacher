@@ -18,17 +18,7 @@
 	background-color: white;
 }
 
-QPushButton{
-	color: #FFFFFF;
-	border: 2px solid rgb(24, 204, 192);
-	background-color: rgb(20,196,188);
-}
-QPushButton:hover{
-	background-color: rgb(22,218,208);
-}
-QPushButton:pressed{
-	background-color: rgb(17,171,164);
-}</string>
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -76,6 +66,19 @@ QPushButton:pressed{
      </item>
      <item>
       <widget class="QPushButton" name="btnEnter">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+	color: #FFFFFF;
+	border: 2px solid rgb(24, 204, 192);
+	background-color: rgb(20,196,188);
+}
+QPushButton:hover{
+	background-color: rgb(22,218,208);
+}
+QPushButton:pressed{
+	background-color: rgb(17,171,164);
+}</string>
+       </property>
        <property name="text">
         <string>进入</string>
        </property>
@@ -99,6 +102,19 @@ QPushButton:pressed{
      </item>
      <item>
       <widget class="QPushButton" name="btnCancel">
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+	color: #FFFFFF;
+	border: 2px solid rgb(24, 204, 192);
+	background-color: rgb(20,196,188);
+}
+QPushButton:hover{
+	background-color: rgb(22,218,208);
+}
+QPushButton:pressed{
+	background-color: rgb(17,171,164);
+}</string>
+       </property>
        <property name="text">
         <string>取消</string>
        </property>
