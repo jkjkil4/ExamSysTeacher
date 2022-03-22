@@ -121,7 +121,6 @@ private:
     // 考试信息
     QString mName;
     QDateTime mDateTimeStart, mDateTimeEnd;
-    bool mScoreInClient;
 
     // 题目列表
     QMap<QString, const QMetaObject *> availableQues;

@@ -73,7 +73,7 @@ ExamWidget::ExamWidget(const QString &dirName, QWidget *parent)
             mName = root.attribute("Name");
             mDateTimeStart = QDateTime::fromString(root.attribute("StartDateTime"), dateTimeFmt);
             mDateTimeEnd = QDateTime::fromString(root.attribute("EndDateTime"), dateTimeFmt);
-            mScoreInClient = root.attribute("ScoreInClient").toInt();
+            ui->cbbScoreInClient->setChecked(root.attribute("ScoreInClient").toInt());
 
             // 读取题目列表
             node = elemQuesList.firstChild();
@@ -143,7 +143,6 @@ ExamWidget::ExamWidget(const QString &dirName, QWidget *parent)
     ui->labelExamName->setText(mName);
     ui->labelStartDateTime->setText(mDateTimeStart.toString("yyyy/M/d HH:mm:ss"));
     ui->labelEndDateTime->setText(mDateTimeEnd.toString("yyyy/M/d HH:mm:ss"));
-    ui->labelScoreInClient->setText(mScoreInClient ? "是" : "否");
     ui->labelNetwork->setText(mAddress.toString() + ":" + QString::number(mTcpServer->serverPort()));
 
     // 初始化表头
@@ -399,7 +398,7 @@ void ExamWidget::scoreAll() {
                 xml.writeStartDocument();
                 xml.writeStartElement("ESDtg");
                 xml.writeAttribute("Type", "StuFinishRetval");
-                if(mScoreInClient)
+                if(ui->cbbScoreInClient->isChecked())
                     writeScoreResultToXml(iter->name, sr, xml);
                 xml.writeEndElement();
                 xml.writeEndDocument();
@@ -617,7 +616,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
                 xml.writeStartDocument();
                 xml.writeStartElement("ESDtg");
                 xml.writeAttribute("Type", "StuFinishRetval");
-                if(mScoreInClient)
+                if(ui->cbbScoreInClient->isChecked())
                     writeScoreResultToXml(stuName, sr, xml);
                 xml.writeEndElement();
                 xml.writeEndDocument();
