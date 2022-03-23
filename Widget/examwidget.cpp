@@ -17,6 +17,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QNetworkInterface>
+#include <QNetworkDatagram>
 
 #include "Util/header.h"
 #include "Ques/quessinglechoice.h"
@@ -489,9 +490,9 @@ void ExamWidget::onItemDoubleClicked(QTableWidgetItem *item) {
     widget->show();
 }
 
-bool ExamWidget::parseUdpDatagram(const QByteArray &array) {
+bool ExamWidget::parseUdpDatagram(const QNetworkDatagram &datagram) {
     QDomDocument doc;
-    if(!doc.setContent(array))
+    if(!doc.setContent(datagram.data()))
         return false;
     QDomElement root = doc.documentElement();
     if(root.tagName() != "ESDtg")
@@ -510,7 +511,7 @@ bool ExamWidget::parseUdpDatagram(const QByteArray &array) {
         xml.writeCharacters(ui->labelExamName->text());
         xml.writeEndElement();
         xml.writeEndDocument();
-        mUdpSocket->writeDatagram(array, QHostAddress(root.text()), 40565);
+        mUdpSocket->writeDatagram(array, datagram.senderAddress(), (ushort)datagram.senderPort());
     } else return false;
 
     return true;
@@ -628,7 +629,7 @@ bool ExamWidget::parseTcpDatagram(QTcpSocket *client, const QByteArray &array) {
     return true;
 }
 
-qint64 ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &address) {
+qint64 ExamWidget::tcpSendVerifyErr(QTcpSocket *client, const QString &what) {
     QByteArray array;
     QXmlStreamWriter xml(&array);
     xml.writeStartDocument();
@@ -637,7 +638,7 @@ qint64 ExamWidget::udpSendVerifyErr(const QString &what, const QHostAddress &add
     xml.writeCharacters(what);
     xml.writeEndElement();
     xml.writeEndDocument();
-    return mUdpSocket->writeDatagram(array, address, 40565);
+    return tcpSendDatagram(client, array);
 }
 
 qint64 ExamWidget::tcpSendDatagram(QTcpSocket *client, const QByteArray &array) {
@@ -646,12 +647,15 @@ qint64 ExamWidget::tcpSendDatagram(QTcpSocket *client, const QByteArray &array) 
 }
 
 void ExamWidget::onUdpReadyRead() {
-    QByteArray datagram;
-    while (mUdpSocket->hasPendingDatagrams()) {
-        datagram.resize(int(mUdpSocket->pendingDatagramSize()));
-        mUdpSocket->readDatagram(datagram.data(), datagram.size());
-        parseUdpDatagram(datagram);
+    while(mUdpSocket->hasPendingDatagrams()) {
+        parseUdpDatagram(mUdpSocket->receiveDatagram());
     }
+//    QByteArray datagram;
+//    while (mUdpSocket->hasPendingDatagrams()) {
+//        datagram.resize(int(mUdpSocket->pendingDatagramSize()));
+//        mUdpSocket->readDatagram(datagram.data(), datagram.size());
+//        parseUdpDatagram(datagram);
+//    }
 }
 
 void ExamWidget::onNewConnection() {
@@ -659,7 +663,8 @@ void ExamWidget::onNewConnection() {
 
     // 当考试已结束时，停止连入
     if(QDateTime::currentDateTime() >= mDateTimeEnd) {
-        udpSendVerifyErr("考试已结束", client->peerAddress());
+        tcpSendVerifyErr(client, "考试已结束");
+        client->flush();
         client->disconnectFromHost();
         return;
     }
@@ -683,13 +688,26 @@ void ExamWidget::onNewConnection() {
                 if(root.tagName() != "ESDtg" || root.attribute("Type") != "TcpVerify")
                     break;
 
-                // 判断考生是否存在
                 stuName = root.attribute("StuName");
+                // 判断考生是否存在
                 const Stu *stu = findStu(stuName);
                 if(!stu) {
-                    udpSendVerifyErr("考生不存在", client->peerAddress());
+                    tcpSendVerifyErr(client, "考生不存在");
+                    client->flush();
                     break;
                 }
+                // 当被占用时，拒绝连入
+                bool isMulti = false;
+                for(const Client &stuClient : mMapStuClient) {
+                    if(stuClient.stuName == stuName) {
+                        tcpSendVerifyErr(client, "考生已在考试中");
+                        client->flush();
+                        isMulti = true;
+                        break;
+                    }
+                }
+                if(isMulti)
+                    break;
 
                 // 验证密码
                 uint salt = root.attribute("Salt").toUInt();
@@ -697,7 +715,8 @@ void ExamWidget::onNewConnection() {
                 QDataStream ds(&verify, QIODevice::WriteOnly);
                 ds << client->peerAddress().toIPv4Address() << client->peerPort() << stu->pwd << salt;
                 if(QCryptographicHash::hash(verify, QCryptographicHash::Md5).toHex() != root.text()) {
-                    udpSendVerifyErr("密码错误", client->peerAddress());
+                    tcpSendVerifyErr(client, "密码错误");
+                    client->flush();
                     break;
                 }
 

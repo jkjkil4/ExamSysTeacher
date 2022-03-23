@@ -22,6 +22,7 @@ class QXmlStreamWriter;
 class QUdpSocket;
 class QTcpServer;
 class QTcpSocket;
+class QNetworkDatagram;
 
 /**
  * @brief   考试控制窗口
@@ -76,10 +77,10 @@ public slots:
     void onItemDoubleClicked(QTableWidgetItem *item);
 
 public:
-    bool parseUdpDatagram(const QByteArray &array);
+    bool parseUdpDatagram(const QNetworkDatagram &datagram);
     bool parseTcpDatagram(QTcpSocket *client, const QByteArray &array);
 
-    qint64 udpSendVerifyErr(const QString &what, const QHostAddress &address);
+    qint64 tcpSendVerifyErr(QTcpSocket *client, const QString &what);
 
     qint64 tcpSendDatagram(QTcpSocket *client, const QByteArray &array);
 
