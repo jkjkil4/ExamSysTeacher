@@ -1,4 +1,5 @@
 # 考试系统（教师端）
+目前仅支持局域网
 
 #### 相关链接
 学生端: [https://gitee.com/jkjkil4/ExamSysStudent](https://gitee.com/jkjkil4/ExamSysStudent) | [https://github.com/jkjkil4/ExamSysStudent](https://github.com/jkjkil4/ExamSysStudent)
