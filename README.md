@@ -1,7 +1,7 @@
 # 考试系统（教师端）
 
 #### 相关链接
-学生端: [https://gitee.com/jkjkil4/ExamSysStudent](https://gitee.com/jkjkil4/ExamSysStudent)
+学生端: [https://gitee.com/jkjkil4/ExamSysStudent](https://gitee.com/jkjkil4/ExamSysStudent) | [https://github.com/jkjkil4/ExamSysStudent](https://github.com/jkjkil4/ExamSysStudent)
 
 #### 使用方法
 在发行版（Releases）里下载ExamSysTeacher.exe  
